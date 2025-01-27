@@ -21,6 +21,7 @@ function App() {
         defaultValue={0.3}
         startAngle={225}
       />
+      <button>test</button>
     </div>
   )
 }

@@ -5,10 +5,19 @@ type RadiansData = {
   "abs.angle": number
 }
 
-export function attachKnobHandlers<Target extends HTMLElement>(
-  target: Target,
-  onChange: (data: RadiansData) => void,
-) {
+interface AttachKnobHandlersProps<Target extends HTMLElement> {
+  target: Target
+  onRotationStart?: () => void
+  onRotation: (data: RadiansData) => void
+  onRotationEnd?: () => void
+}
+
+export function attachKnobHandlers<Target extends HTMLElement>({
+  target,
+  onRotationStart,
+  onRotation,
+  onRotationEnd,
+}: AttachKnobHandlersProps<Target>) {
   let isDragging = false
   let targetCenterX = 0
   let targetCenterY = 0
@@ -18,7 +27,6 @@ export function attachKnobHandlers<Target extends HTMLElement>(
   let radians = 0
 
   function handleDown(ev: PointerEvent) {
-    console.log("handleDown")
     ev.preventDefault()
 
     const targetRect = target.getBoundingClientRect()
@@ -34,6 +42,7 @@ export function attachKnobHandlers<Target extends HTMLElement>(
     )
 
     isDragging = true
+    onRotationStart?.()
   }
 
   function handleMove(ev: PointerEvent) {
@@ -60,7 +69,7 @@ export function attachKnobHandlers<Target extends HTMLElement>(
 
     radians = nextRadians
 
-    onChange({
+    onRotation({
       "delta.radians": deltaRadians,
       "delta.angle": (deltaRadians * 180) / Math.PI,
       "abs.radians": nextRadians,
@@ -70,6 +79,7 @@ export function attachKnobHandlers<Target extends HTMLElement>(
 
   function handleEnd(ev: PointerEvent) {
     isDragging = false
+    onRotationEnd?.()
   }
 
   target.addEventListener("pointerdown", handleDown)

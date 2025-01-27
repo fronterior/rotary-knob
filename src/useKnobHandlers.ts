@@ -1,5 +1,6 @@
 import { type RefObject, useLayoutEffect, useState } from "react"
 import { attachKnobHandlers } from "./core"
+import { cursor } from "./cursor-layer"
 
 interface UseKnobHandlersProps<Target extends HTMLElement> {
   defaultRadians?: number
@@ -12,13 +13,33 @@ export function useRotationHandlers<Target extends HTMLElement>({
 }: UseKnobHandlersProps<Target>) {
   const [radians, setRadians] = useState(defaultRadians)
 
+  const [isRotating, setIsRotating] = useState(false)
   useLayoutEffect(() => {
-    return attachKnobHandlers(ref.current!, ({ ["delta.radians"]: delta }) => {
-      setRadians((value) => {
-        const nextvalue = value + delta
+    if (isRotating) {
+      cursor.show("grabbing")
+    } else {
+      cursor.hide()
+    }
 
-        return nextvalue
-      })
+    return () => {}
+  }, [isRotating])
+
+  useLayoutEffect(() => {
+    return attachKnobHandlers({
+      target: ref.current!,
+      onRotationStart: () => {
+        setIsRotating(true)
+      },
+      onRotation: ({ ["delta.radians"]: delta }) => {
+        setRadians((value) => {
+          const nextvalue = value + delta
+
+          return nextvalue
+        })
+      },
+      onRotationEnd: () => {
+        setIsRotating(false)
+      },
     })
   }, [ref])
 

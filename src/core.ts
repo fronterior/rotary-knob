@@ -8,6 +8,7 @@ type RadiansData = {
 export function attachKnobHandlers<Target extends HTMLElement>(
   target: Target,
   onChange: (data: RadiansData) => void,
+  onPointerUp: () => void,
 ) {
   let isDragging = false
   let targetCenterX = 0
@@ -70,6 +71,7 @@ export function attachKnobHandlers<Target extends HTMLElement>(
 
   function handleEnd(ev: PointerEvent) {
     isDragging = false
+    onPointerUp?.()
   }
 
   target.addEventListener("pointerdown", handleDown)

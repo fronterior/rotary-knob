@@ -1,6 +1,7 @@
 import { useMemo, useRef } from "react"
-import { useKnobHandlers } from "./useKnobHandlers"
+import { useRotationHandlers } from "./useKnobHandlers"
 import "./Knob.css"
+import { usePointerUp } from "./usePointerUp"
 
 export function Knob() {
   const options = useMemo(
@@ -28,10 +29,8 @@ export function Knob() {
 
   const knobRef = useRef<HTMLButtonElement>(null)
 
-  const radians = useKnobHandlers({
+  const [radians, setRadians] = useRotationHandlers({
     defaultRadians: options.defaultValue,
-    minRadians,
-    maxRadians,
     ref: knobRef,
   })
 
@@ -56,6 +55,10 @@ export function Knob() {
   const clampedRadians = useMemo(() => {
     return Math.min(maxRadians, Math.max(minRadians, steppedRadians))
   }, [steppedRadians, minRadians, maxRadians])
+
+  usePointerUp(() => {
+    setRadians(clampedRadians)
+  })
 
   const value = useMemo(() => {
     const { minValue, maxValue } = options

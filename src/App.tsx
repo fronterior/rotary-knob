@@ -1,6 +1,6 @@
 import "./App.css"
 import { Knob } from "./Knob"
-import "./Knob.css"
+import styles from "./Knob.module.css"
 
 function App() {
   return (
@@ -12,7 +12,9 @@ function App() {
         maxValue={1}
         stepAngle={60}
         startAngle={210}
-      />
+      >
+        <button type="button" className={styles.head} />
+      </Knob>
       <Knob
         minAngle={0}
         maxAngle={270}
@@ -20,7 +22,9 @@ function App() {
         maxValue={1}
         defaultValue={0.3}
         startAngle={225}
-      />
+      >
+        <button type="button" className={styles.head} />
+      </Knob>
       <button>test</button>
     </div>
   )

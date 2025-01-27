@@ -1,26 +1,30 @@
-import { useMemo, useRef } from "react"
+import { useLayoutEffect, useMemo, useRef, type ReactNode } from "react"
 import { useRotationHandlers } from "./useKnobHandlers"
-import "./Knob.css"
 import { usePointerUp } from "./usePointerUp"
+import styles from "./Knob.module.css"
 
 interface KnobProps {
+  defaultValue?: number
   minAngle?: number
   maxAngle?: number
   minValue?: number
   maxValue?: number
-  defaultValue?: number
+  children: ReactNode
   startAngle?: number
   stepAngle?: number
+  onChange?: (value: number) => void
 }
 
 export function Knob({
+  defaultValue = 0.5,
   minAngle,
   maxAngle,
   minValue = 0,
   maxValue = 1,
-  defaultValue = 0.5,
+  children,
   startAngle = 0,
   stepAngle,
+  onChange,
 }: KnobProps) {
   const { minRadians, maxRadians, startRadians, stepRadians } = useMemo(() => {
     const minRadians = Number.isFinite(minAngle)
@@ -47,13 +51,13 @@ export function Knob({
     return (
       ((minAngle +
         ((maxAngle - minAngle) * (defaultValue - minValue)) /
-          (maxValue - minValue)) /
+        (maxValue - minValue)) /
         180) *
       Math.PI
     )
   }, [minAngle, maxAngle, defaultValue, minValue, maxValue])
 
-  const knobRef = useRef<HTMLButtonElement>(null)
+  const knobRef = useRef<HTMLDivElement>(null)
 
   const [radians, setRadians] = useRotationHandlers({
     defaultRadians,
@@ -72,7 +76,7 @@ export function Knob({
 
     return (
       (((stepRadians + (radians % stepRadians)) % stepRadians) / stepRadians >
-      0.5
+        0.5
         ? highValue
         : lowValue) * stepRadians
     )
@@ -86,27 +90,34 @@ export function Knob({
     setRadians(clampedRadians)
   })
 
+  const computedAngle = useMemo(
+    () => ((clampedRadians + startRadians) / Math.PI) * 180,
+    [clampedRadians, startRadians],
+  )
+
   const value = useMemo(() => {
     const computedValue =
       (clampedRadians / (maxRadians - minRadians)) * (maxValue - minValue)
 
     return computedValue + minValue
   }, [clampedRadians, minRadians, maxRadians, minValue, maxValue])
+  useLayoutEffect(() => {
+    onChange?.(value)
+  }, [value, onChange])
+
+  if (!children) {
+    return null
+  }
 
   return (
-    <>
-      <div className="knob-container">
-        <button
-          className="knob-head"
-          draggable
-          style={{
-            cursor: "grab",
-            transform: `rotate(${((clampedRadians + startRadians) / Math.PI) * 180}deg)`,
-          }}
-          ref={knobRef}
-        ></button>
-      </div>
-      <div>{value.toFixed(3)}</div>
-    </>
+    <div
+      className={styles.container}
+      style={{
+        transform: `rotate(${computedAngle}deg)`,
+      }}
+      ref={knobRef}
+    >
+      {children}
+    </div>
   )
 }

@@ -82,15 +82,3 @@ export function attachKnobHandlers<Target extends HTMLElement>(
     document.removeEventListener("pointerup", handleEnd)
   }
 }
-
-interface CreateKnobTransFormerProps {
-  min?: number
-  max?: number
-  step?: number
-}
-
-export function createKnobTransformer({}: CreateKnobTransFormerProps) {
-  return function knobTransformer({
-    ["delta.radians"]: deltaRadians,
-  }: RadiansData) {}
-}

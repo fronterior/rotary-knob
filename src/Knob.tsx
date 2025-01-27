@@ -3,34 +3,60 @@ import { useRotationHandlers } from "./useKnobHandlers"
 import "./Knob.css"
 import { usePointerUp } from "./usePointerUp"
 
-export function Knob() {
-  const options = useMemo(
-    () => ({
-      minAngle: 0,
-      maxAngle: 300,
-      minValue: 0,
-      maxValue: 5,
-      defaultValue: 0,
-      startAngle: 210,
-      step: 300 / 5,
-    }),
-    [],
-  )
+interface KnobProps {
+  minAngle?: number
+  maxAngle?: number
+  minValue?: number
+  maxValue?: number
+  defaultValue?: number
+  startAngle?: number
+  stepAngle?: number
+}
 
+export function Knob({
+  minAngle,
+  maxAngle,
+  minValue = 0,
+  maxValue = 1,
+  defaultValue = 0.5,
+  startAngle = 0,
+  stepAngle,
+}: KnobProps) {
   const { minRadians, maxRadians, startRadians, stepRadians } = useMemo(() => {
-    const { minAngle, maxAngle, startAngle, step } = options
-    const minRadians = (minAngle / 180) * Math.PI
-    const maxRadians = (maxAngle / 180) * Math.PI
-    const startRadians = (startAngle / 180) * Math.PI
-    const stepRadians = (step / 180) * Math.PI
+    const minRadians = Number.isFinite(minAngle)
+      ? (minAngle! / 180) * Math.PI
+      : -Infinity
+    const maxRadians = Number.isFinite(maxAngle)
+      ? (maxAngle! / 180) * Math.PI
+      : Infinity
+    const startRadians =
+      startAngle && Number.isFinite(startAngle)
+        ? (startAngle / 180) * Math.PI
+        : 0
+    const stepRadians =
+      stepAngle && Number.isFinite(stepAngle) ? (stepAngle / 180) * Math.PI : 0
 
     return { minRadians, maxRadians, startRadians, stepRadians }
-  }, [options])
+  }, [minAngle, maxAngle, startAngle, stepAngle])
+
+  const defaultRadians = useMemo(() => {
+    if (minAngle === undefined || maxAngle === undefined) {
+      return 0
+    }
+
+    return (
+      ((minAngle +
+        ((maxAngle - minAngle) * (defaultValue - minValue)) /
+          (maxValue - minValue)) /
+        180) *
+      Math.PI
+    )
+  }, [minAngle, maxAngle, defaultValue, minValue, maxValue])
 
   const knobRef = useRef<HTMLButtonElement>(null)
 
   const [radians, setRadians] = useRotationHandlers({
-    defaultRadians: options.defaultValue,
+    defaultRadians,
     ref: knobRef,
   })
 
@@ -61,16 +87,14 @@ export function Knob() {
   })
 
   const value = useMemo(() => {
-    const { minValue, maxValue } = options
     const computedValue =
       (clampedRadians / (maxRadians - minRadians)) * (maxValue - minValue)
 
     return computedValue + minValue
-  }, [clampedRadians, minRadians, maxRadians, options])
+  }, [clampedRadians, minRadians, maxRadians, minValue, maxValue])
 
   return (
     <>
-      <div style={{ width: 30, height: 30, background: "blue" }}></div>
       <div className="knob-container">
         <button
           className="knob-head"

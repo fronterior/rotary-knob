@@ -6,35 +6,56 @@ export function Knob() {
   const options = useMemo(
     () => ({
       minAngle: 0,
-      maxAngle: 270,
+      maxAngle: 300,
       minValue: 0,
-      maxValue: 1,
+      maxValue: 5,
       defaultValue: 0,
-      startAngle: 225,
-      step: 6,
+      startAngle: 210,
+      step: 300 / 5,
     }),
     [],
   )
 
-  const knobRef = useRef<HTMLButtonElement>(null)
-
-  const radians = useKnobHandlers({
-    defaultValue: options.defaultValue,
-    ref: knobRef,
-  })
-
-  const { minRadians, maxRadians, startRadians } = useMemo(() => {
-    const { minAngle, maxAngle, startAngle } = options
+  const { minRadians, maxRadians, startRadians, stepRadians } = useMemo(() => {
+    const { minAngle, maxAngle, startAngle, step } = options
     const minRadians = (minAngle / 180) * Math.PI
     const maxRadians = (maxAngle / 180) * Math.PI
     const startRadians = (startAngle / 180) * Math.PI
+    const stepRadians = (step / 180) * Math.PI
 
-    return { minRadians, maxRadians, startRadians }
+    return { minRadians, maxRadians, startRadians, stepRadians }
   }, [options])
 
+  const knobRef = useRef<HTMLButtonElement>(null)
+
+  const radians = useKnobHandlers({
+    defaultRadians: options.defaultValue,
+    minRadians,
+    maxRadians,
+    ref: knobRef,
+  })
+
+  const steppedRadians = useMemo(() => {
+    if (!stepRadians) {
+      return radians
+    }
+
+    const scaledValue = Math.floor(radians / stepRadians)
+
+    const lowValue = scaledValue
+    const highValue = scaledValue + 1
+
+    return (
+      (((stepRadians + (radians % stepRadians)) % stepRadians) / stepRadians >
+      0.5
+        ? highValue
+        : lowValue) * stepRadians
+    )
+  }, [radians, stepRadians])
+
   const clampedRadians = useMemo(() => {
-    return Math.min(maxRadians, Math.max(minRadians, radians))
-  }, [radians, minRadians, maxRadians])
+    return Math.min(maxRadians, Math.max(minRadians, steppedRadians))
+  }, [steppedRadians, minRadians, maxRadians])
 
   const value = useMemo(() => {
     const { minValue, maxValue } = options

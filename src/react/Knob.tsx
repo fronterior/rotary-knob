@@ -1,10 +1,9 @@
 import { useLayoutEffect, useMemo, useRef, type ReactNode } from "react"
 import { RotationStatus, useRotationHandlers } from "./hooks/useRotationHandlers"
 import { usePointerUp } from "./hooks/usePointerUp"
-import styles from "./Knob.module.css"
 import { useSteppedRadians } from "./hooks/useSteppedRadians"
 import { useClampedRadians } from "./hooks/useClampedRadians"
-import type { RotationData } from "./core"
+import type { RotationData } from "../js/core"
 
 interface KnobProps {
   defaultValue?: number
@@ -124,8 +123,9 @@ export function Knob({
 
   return (
     <div
-      className={styles.container}
       style={{
+        display: 'inline-block',
+        cursor: 'grab',
         transform: `rotate(${computedAngle}deg)`,
       }}
       ref={knobRef}

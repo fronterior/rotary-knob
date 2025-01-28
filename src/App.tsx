@@ -1,6 +1,6 @@
+import { Knob } from "./react"
 import "./App.css"
-import { Knob } from "./Knob"
-import "./Knob/styles.css"
+import "./style/sample.css"
 
 function App() {
   return (

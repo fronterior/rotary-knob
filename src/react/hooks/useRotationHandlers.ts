@@ -1,6 +1,6 @@
 import { type RefObject, useLayoutEffect, useState } from "react"
-import { type RotationData, attachKnobHandlers } from "../core"
-import { cursor } from "../cursor-layer"
+import { type RotationData, attachKnobHandlers } from "../../js/core"
+import { cursor } from "../../js/cursor-layer"
 
 interface UseKnobHandlersProps<Target extends HTMLElement> {
   defaultRadians?: number

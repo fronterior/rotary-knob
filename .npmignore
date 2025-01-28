@@ -1,0 +1,6 @@
+src/
+vite.config.ts
+index.html
+.gitignore
+.prettierrc
+eslint.config.js

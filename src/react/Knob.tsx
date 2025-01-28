@@ -1,9 +1,19 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react"
-import { RotationStatus, useRotationHandlers } from "./hooks/useRotationHandlers"
-import { usePointerUp } from "./hooks/usePointerUp"
-import { useSteppedRadians } from "./hooks/useSteppedRadians"
-import { useClampedRadians } from "./hooks/useClampedRadians"
-import type { RotationData } from "../js/core"
+import {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react'
+import {
+  RotationStatus,
+  useRotationHandlers,
+} from './hooks/useRotationHandlers'
+import { usePointerUp } from './hooks/usePointerUp'
+import { useSteppedRadians } from './hooks/useSteppedRadians'
+import { useClampedRadians } from './hooks/useClampedRadians'
+import type { RotationData } from '../js/core'
 
 interface KnobProps {
   defaultValue?: number
@@ -79,7 +89,11 @@ export function Knob({
 
   const steppedRadians = useSteppedRadians(radians, stepRadians)
 
-  const clampedRadians = useClampedRadians(steppedRadians, minRadians, maxRadians)
+  const clampedRadians = useClampedRadians(
+    steppedRadians,
+    minRadians,
+    maxRadians,
+  )
 
   usePointerUp(() => {
     setRadians(clampedRadians)
@@ -111,15 +125,17 @@ export function Knob({
     ['delta.angle']: 0,
     ['delta.radians']: 0,
     ['abs.angle']: computedAngle,
-    ['abs.radians']: clampedRadians
+    ['abs.radians']: clampedRadians,
   })
   // It is called only when the knob angle changes.
   useLayoutEffect(() => {
     const rotationData = {
-      ['delta.angle']: computedAngle - previousRotationData.current['abs.angle'],
-      ['delta.radians']: clampedRadians - previousRotationData.current['abs.radians'],
+      ['delta.angle']:
+        computedAngle - previousRotationData.current['abs.angle'],
+      ['delta.radians']:
+        clampedRadians - previousRotationData.current['abs.radians'],
       ['abs.angle']: computedAngle,
-      ['abs.radians']: clampedRadians
+      ['abs.radians']: clampedRadians,
     }
     previousRotationData.current = rotationData
 
@@ -160,10 +176,10 @@ export function Knob({
     ) {
       return
     }
-    const radiansByValueProp = ((minAngle +
-      ((maxAngle - minAngle) * (value - minValue)) /
-      (maxValue - minValue)) /
-      180) *
+    const radiansByValueProp =
+      ((minAngle +
+        ((maxAngle - minAngle) * (value - minValue)) / (maxValue - minValue)) /
+        180) *
       Math.PI
 
     if (Number.isNaN(radiansByValueProp)) {
@@ -173,9 +189,7 @@ export function Knob({
     ignoreEffectRef.current = true
     setIntegratedRadians(radiansByValueProp)
     setRadians(radiansByValueProp)
-
   }, [value, minAngle, maxAngle, minValue, maxValue, setRadians])
-
 
   useEffect(() => {
     ignoreEffectRef.current = false

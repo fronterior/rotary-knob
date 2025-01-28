@@ -1,7 +1,7 @@
-import { useLayoutEffect, useRef } from "react"
+import { useLayoutEffect, useRef } from 'react'
 
 export function usePointerUp(handle: () => void) {
-  const handleRef = useRef(() => {})
+  const handleRef = useRef(() => { })
   handleRef.current = handle
 
   useLayoutEffect(() => {
@@ -9,9 +9,9 @@ export function usePointerUp(handle: () => void) {
       handleRef.current()
     }
 
-    window.addEventListener("pointerup", wrapper)
+    window.addEventListener('pointerup', wrapper)
     return () => {
-      window.removeEventListener("pointerup", wrapper)
+      window.removeEventListener('pointerup', wrapper)
     }
   }, [])
 }

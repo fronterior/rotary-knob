@@ -1,8 +1,11 @@
-import { Knob } from "./react"
-import "./App.css"
-import "./style/sample.css"
+import { Knob } from './react'
+import './App.css'
+import './style/sample.css'
+import { useState } from 'react'
 
 function App() {
+  const [value, setValue] = useState(0)
+
   return (
     <div>
       <h1>Knob</h1>
@@ -34,18 +37,34 @@ function App() {
       </div>
       <h1>Infinite Knob</h1>
       <div>
-        <Knob
-          startAngle={225}
-          onDeltaChange={console.log}
-        >
+        <Knob startAngle={225} onDeltaChange={console.log}>
           <button type="button" className="knob" />
         </Knob>
       </div>
       <div>
+        <Knob startAngle={225} stepAngle={30} onValueChange={console.log}>
+          <button type="button" className="knob" />
+        </Knob>
+      </div>
+      <h1>Controlled Value</h1>
+      <div>
+        <input
+          type="number"
+          min="0"
+          max="1"
+          step="0.1"
+          value={value}
+          onChange={(e) => setValue(Number(e.target.value))}
+        />
         <Knob
+          defaultValue={0.3}
+          value={value}
+          onValueChange={setValue}
+          minAngle={0}
+          maxAngle={270}
+          minValue={0}
+          maxValue={1}
           startAngle={225}
-          stepAngle={30}
-          onValueChange={console.log}
         >
           <button type="button" className="knob" />
         </Knob>

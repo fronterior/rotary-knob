@@ -64,7 +64,7 @@ export function attachKnobHandlers<Target extends HTMLElement>({
 
     const deltaRadians = isInverted
       ? Math.sign(radians) *
-        (Math.PI - Math.abs(nextRadians) + Math.PI - Math.abs(radians))
+      (Math.PI - Math.abs(nextRadians) + Math.PI - Math.abs(radians))
       : nextRadians - radians
 
     radians = nextRadians

@@ -1,4 +1,4 @@
-import { useLayoutEffect, useMemo, useRef, type ReactNode } from "react"
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react"
 import { RotationStatus, useRotationHandlers } from "./hooks/useRotationHandlers"
 import { usePointerUp } from "./hooks/usePointerUp"
 import { useSteppedRadians } from "./hooks/useSteppedRadians"
@@ -14,6 +14,7 @@ interface KnobProps {
   children: ReactNode
   startAngle?: number
   stepAngle?: number
+  value?: number
   onDeltaChange?: (rotationData: RotationData) => void
   onValueChange?: (value: number, rotationData: RotationData) => void
   onStatusChange?: (status: RotationStatus) => void
@@ -28,6 +29,7 @@ export function Knob({
   children,
   startAngle = 0,
   stepAngle,
+  value,
   onDeltaChange,
   onValueChange,
   onStatusChange,
@@ -65,6 +67,9 @@ export function Knob({
     )
   }, [minAngle, maxAngle, defaultValue, minValue, maxValue])
 
+  const [integratedRadians, setIntegratedRadians] = useState(defaultRadians)
+  const isControlledValue = value !== undefined
+
   const knobRef = useRef<HTMLDivElement>(null)
 
   const { rotationData, radians, setRadians, status } = useRotationHandlers({
@@ -80,24 +85,35 @@ export function Knob({
     setRadians(clampedRadians)
   })
 
+  useLayoutEffect(() => {
+    if (isControlledValue) {
+      return
+    }
+
+    setIntegratedRadians(clampedRadians)
+  }, [clampedRadians, isControlledValue])
+
   const computedAngle = useMemo(
-    () => ((clampedRadians + startRadians) / Math.PI) * 180,
-    [clampedRadians, startRadians],
+    () => ((integratedRadians + startRadians) / Math.PI) * 180,
+    [integratedRadians, startRadians],
   )
 
-  const value = useMemo(() => {
+  const computedValue = useMemo(() => {
     const computedValue =
       (clampedRadians / (maxRadians - minRadians)) * (maxValue - minValue)
 
     return computedValue + minValue
   }, [clampedRadians, minRadians, maxRadians, minValue, maxValue])
 
+  // effect
+  const ignoreEffectRef = useRef(false)
   const previousRotationData = useRef<RotationData>({
     ['delta.angle']: 0,
     ['delta.radians']: 0,
     ['abs.angle']: computedAngle,
     ['abs.radians']: clampedRadians
   })
+  // It is called only when the knob angle changes.
   useLayoutEffect(() => {
     const rotationData = {
       ['delta.angle']: computedAngle - previousRotationData.current['abs.angle'],
@@ -105,17 +121,66 @@ export function Knob({
       ['abs.angle']: computedAngle,
       ['abs.radians']: clampedRadians
     }
-    onValueChange?.(value, rotationData)
     previousRotationData.current = rotationData
-  }, [clampedRadians, computedAngle, value, onValueChange])
 
+    if (ignoreEffectRef.current) {
+      return
+    }
+
+    onValueChange?.(computedValue, rotationData)
+    // WARN: Intentionally exclude specific dependencies to ensure it is called only during rotation(uncontrolled)
+  }, [clampedRadians, computedValue])
+
+  // It is called when the drag rotation action is performed.
   useLayoutEffect(() => {
+    if (ignoreEffectRef.current) {
+      return
+    }
+
     onDeltaChange?.(rotationData)
-  }, [rotationData, onDeltaChange])
+    // WARN: Intentionally exclude specific dependencies to ensure it is called only during rotation(uncontrolled)
+  }, [rotationData])
 
+  // It is called when the knob is pressed, rotated, or released.
   useLayoutEffect(() => {
+    if (ignoreEffectRef.current) {
+      return
+    }
+
     onStatusChange?.(status)
-  }, [status, onStatusChange])
+    // WARN: Intentionally exclude specific dependencies to ensure it is called only during rotation(uncontrolled)
+  }, [status])
+
+  // for controlled value prop
+  useLayoutEffect(() => {
+    if (
+      value === undefined ||
+      minAngle == undefined ||
+      maxAngle === undefined
+    ) {
+      return
+    }
+    const radiansByValueProp = ((minAngle +
+      ((maxAngle - minAngle) * (value - minValue)) /
+      (maxValue - minValue)) /
+      180) *
+      Math.PI
+
+    if (Number.isNaN(radiansByValueProp)) {
+      return
+    }
+    console.log('test', value, radiansByValueProp)
+
+    ignoreEffectRef.current = true
+    setIntegratedRadians(radiansByValueProp)
+    setRadians(radiansByValueProp)
+
+  }, [value, minAngle, maxAngle, minValue, maxValue, setRadians])
+
+
+  useEffect(() => {
+    ignoreEffectRef.current = false
+  }, [ignoreEffectRef.current])
 
   if (!children) {
     return null

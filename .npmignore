@@ -4,3 +4,6 @@ index.html
 .gitignore
 .prettierrc
 eslint.config.js
+tsconfig.json
+tsconfig.app.json
+tsconfig.node.json

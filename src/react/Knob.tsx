@@ -169,7 +169,6 @@ export function Knob({
     if (Number.isNaN(radiansByValueProp)) {
       return
     }
-    console.log('test', value, radiansByValueProp)
 
     ignoreEffectRef.current = true
     setIntegratedRadians(radiansByValueProp)

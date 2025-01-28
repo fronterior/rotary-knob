@@ -1,4 +1,4 @@
-import { type RefObject, useLayoutEffect, useState } from 'react'
+import { type RefObject, useLayoutEffect, useRef, useState } from 'react'
 import { type RotationData, attachKnobHandlers } from '../../js/core'
 import { cursor } from '../../js/cursor-layer'
 
@@ -18,6 +18,13 @@ export function useRotationHandlers<Target extends HTMLElement>({
   defaultRadians = 0,
   ref,
 }: UseKnobHandlersProps<Target>) {
+  // NOTE:
+  // Within this hook, radians only changes when a rotation action occurs.
+  // When radians changes, it triggers a callback function related to value changes.
+  // However, when it needs to synchronize with an externally provided value, there is no need to notify the value change since the external source already knows the value.
+  // This behavior is similar to the controlled pattern of an input in React.
+  // Therefore, to handle external value synchronization, useRef is used to prevent unnecessary updates.
+  const internalRadianRef = useRef(defaultRadians)
   const [radians, setRadians] = useState(defaultRadians)
   const [rotationData, setRotationData] = useState<RotationData>({
     ['delta.radians']: 0,
@@ -46,11 +53,13 @@ export function useRotationHandlers<Target extends HTMLElement>({
         setStatus(RotationStatus.Begin)
       },
       onRotation: (data) => {
-        setRadians((value) => {
+        setRadians(() => {
           const delta = data['delta.radians']
-          const nextvalue = value + delta
+          const nextValue = internalRadianRef.current + delta
 
-          return nextvalue
+          internalRadianRef.current = nextValue
+
+          return nextValue
         })
         setRotationData(data)
         setStatus(RotationStatus.Rotating)
@@ -71,7 +80,9 @@ export function useRotationHandlers<Target extends HTMLElement>({
   return {
     radians,
     rotationData,
-    setRadians,
+    setInternalRadians(value: number) {
+      internalRadianRef.current = value
+    },
     status,
   }
 }

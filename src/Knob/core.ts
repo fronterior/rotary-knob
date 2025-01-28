@@ -1,4 +1,4 @@
-type RadiansData = {
+export type RotationData = {
   "delta.radians": number
   "delta.angle": number
   "abs.radians": number
@@ -8,7 +8,7 @@ type RadiansData = {
 interface AttachKnobHandlersProps<Target extends HTMLElement> {
   target: Target
   onRotationStart?: () => void
-  onRotation: (data: RadiansData) => void
+  onRotation: (data: RotationData) => void
   onRotationEnd?: () => void
 }
 
@@ -78,6 +78,10 @@ export function attachKnobHandlers<Target extends HTMLElement>({
   }
 
   function handleEnd() {
+    if (!isDragging) {
+      return
+    }
+
     isDragging = false
     onRotationEnd?.()
   }

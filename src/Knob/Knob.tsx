@@ -1,7 +1,10 @@
 import { useLayoutEffect, useMemo, useRef, type ReactNode } from "react"
-import { useRotationHandlers } from "./useKnobHandlers"
-import { usePointerUp } from "./usePointerUp"
+import { RotationStatus, useRotationHandlers } from "./hooks/useRotationHandlers"
+import { usePointerUp } from "./hooks/usePointerUp"
 import styles from "./Knob.module.css"
+import { useSteppedRadians } from "./hooks/useSteppedRadians"
+import { useClampedRadians } from "./hooks/useClampedRadians"
+import type { RotationData } from "./core"
 
 interface KnobProps {
   defaultValue?: number
@@ -12,7 +15,9 @@ interface KnobProps {
   children: ReactNode
   startAngle?: number
   stepAngle?: number
-  onChange?: (value: number) => void
+  onDeltaChange?: (rotationData: RotationData) => void
+  onValueChange?: (value: number, rotationData: RotationData) => void
+  onStatusChange?: (status: RotationStatus) => void
 }
 
 export function Knob({
@@ -24,8 +29,11 @@ export function Knob({
   children,
   startAngle = 0,
   stepAngle,
-  onChange,
+  onDeltaChange,
+  onValueChange,
+  onStatusChange,
 }: KnobProps) {
+  // props to radians
   const { minRadians, maxRadians, startRadians, stepRadians } = useMemo(() => {
     const minRadians = Number.isFinite(minAngle)
       ? (minAngle! / 180) * Math.PI
@@ -43,6 +51,7 @@ export function Knob({
     return { minRadians, maxRadians, startRadians, stepRadians }
   }, [minAngle, maxAngle, startAngle, stepAngle])
 
+  // defaultValue to radians
   const defaultRadians = useMemo(() => {
     if (minAngle === undefined || maxAngle === undefined) {
       return 0
@@ -59,32 +68,14 @@ export function Knob({
 
   const knobRef = useRef<HTMLDivElement>(null)
 
-  const [radians, setRadians] = useRotationHandlers({
+  const { rotationData, radians, setRadians, status } = useRotationHandlers({
     defaultRadians,
     ref: knobRef,
   })
 
-  const steppedRadians = useMemo(() => {
-    if (!stepRadians) {
-      return radians
-    }
+  const steppedRadians = useSteppedRadians(radians, stepRadians)
 
-    const scaledValue = Math.floor(radians / stepRadians)
-
-    const lowValue = scaledValue
-    const highValue = scaledValue + 1
-
-    return (
-      (((stepRadians + (radians % stepRadians)) % stepRadians) / stepRadians >
-        0.5
-        ? highValue
-        : lowValue) * stepRadians
-    )
-  }, [radians, stepRadians])
-
-  const clampedRadians = useMemo(() => {
-    return Math.min(maxRadians, Math.max(minRadians, steppedRadians))
-  }, [steppedRadians, minRadians, maxRadians])
+  const clampedRadians = useClampedRadians(steppedRadians, minRadians, maxRadians)
 
   usePointerUp(() => {
     setRadians(clampedRadians)
@@ -101,9 +92,31 @@ export function Knob({
 
     return computedValue + minValue
   }, [clampedRadians, minRadians, maxRadians, minValue, maxValue])
+
+  const previousRotationData = useRef<RotationData>({
+    ['delta.angle']: 0,
+    ['delta.radians']: 0,
+    ['abs.angle']: computedAngle,
+    ['abs.radians']: clampedRadians
+  })
   useLayoutEffect(() => {
-    onChange?.(value)
-  }, [value, onChange])
+    const rotationData = {
+      ['delta.angle']: computedAngle - previousRotationData.current['abs.angle'],
+      ['delta.radians']: clampedRadians - previousRotationData.current['abs.radians'],
+      ['abs.angle']: computedAngle,
+      ['abs.radians']: clampedRadians
+    }
+    onValueChange?.(value, rotationData)
+    previousRotationData.current = rotationData
+  }, [clampedRadians, computedAngle, value, onValueChange])
+
+  useLayoutEffect(() => {
+    onDeltaChange?.(rotationData)
+  }, [rotationData, onDeltaChange])
+
+  useLayoutEffect(() => {
+    onStatusChange?.(status)
+  }, [status, onStatusChange])
 
   if (!children) {
     return null

@@ -1,17 +1,27 @@
 import { type RefObject, useLayoutEffect, useState } from "react"
-import { attachKnobHandlers } from "./core"
-import { cursor } from "./cursor-layer"
+import { type RotationData, attachKnobHandlers } from "../core"
+import { cursor } from "../cursor-layer"
 
 interface UseKnobHandlersProps<Target extends HTMLElement> {
   defaultRadians?: number
   ref: RefObject<Target>
 }
 
+export enum RotationStatus {
+  Idle,
+  Begin,
+  Rotating,
+  End,
+}
+
+
 export function useRotationHandlers<Target extends HTMLElement>({
   defaultRadians = 0,
   ref,
 }: UseKnobHandlersProps<Target>) {
   const [radians, setRadians] = useState(defaultRadians)
+  const [rotationData, setRotationData] = useState<RotationData>({ ['delta.radians']: 0, ['delta.angle']: 0, ['abs.radians']: 0, ['abs.angle']: 0 })
+  const [status, setStatus] = useState(RotationStatus.Idle)
 
   const [isRotating, setIsRotating] = useState(false)
   useLayoutEffect(() => {
@@ -21,7 +31,7 @@ export function useRotationHandlers<Target extends HTMLElement>({
       cursor.hide()
     }
 
-    return () => {}
+    return () => { }
   }, [isRotating])
 
   useLayoutEffect(() => {
@@ -29,19 +39,35 @@ export function useRotationHandlers<Target extends HTMLElement>({
       target: ref.current!,
       onRotationStart: () => {
         setIsRotating(true)
+        setStatus(RotationStatus.Begin)
       },
-      onRotation: ({ ["delta.radians"]: delta }) => {
+      onRotation: (data) => {
         setRadians((value) => {
+          const delta = data["delta.radians"]
           const nextvalue = value + delta
 
           return nextvalue
         })
+        setRotationData(data)
+        setStatus(RotationStatus.Rotating)
       },
       onRotationEnd: () => {
         setIsRotating(false)
+        setStatus(RotationStatus.End)
       },
     })
   }, [ref])
 
-  return [radians, setRadians] as const
+  useLayoutEffect(() => {
+    if (status === RotationStatus.End) {
+      setStatus(RotationStatus.Idle)
+    }
+  }, [status])
+
+  return {
+    radians,
+    rotationData,
+    setRadians,
+    status,
+  }
 }

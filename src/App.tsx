@@ -1,31 +1,55 @@
 import "./App.css"
 import { Knob } from "./Knob"
-import styles from "./Knob.module.css"
+import "./Knob/styles.css"
 
 function App() {
   return (
     <div>
-      <Knob
-        minAngle={0}
-        maxAngle={300}
-        minValue={0}
-        maxValue={1}
-        stepAngle={60}
-        startAngle={210}
-      >
-        <button type="button" className={styles.head} />
-      </Knob>
-      <Knob
-        minAngle={0}
-        maxAngle={270}
-        minValue={0}
-        maxValue={1}
-        defaultValue={0.3}
-        startAngle={225}
-      >
-        <button type="button" className={styles.head} />
-      </Knob>
-      <button>test</button>
+      <h1>Knob</h1>
+      <div>
+        <Knob
+          defaultValue={1}
+          minAngle={0}
+          maxAngle={300}
+          minValue={0}
+          maxValue={5}
+          startAngle={210}
+          stepAngle={60}
+          onStatusChange={console.log}
+        >
+          <button type="button" className="knob" />
+        </Knob>
+      </div>
+      <div>
+        <Knob
+          defaultValue={0.3}
+          minAngle={0}
+          maxAngle={270}
+          minValue={0}
+          maxValue={1}
+          startAngle={225}
+        >
+          <button type="button" className="knob" />
+        </Knob>
+      </div>
+      <h1>Infinite Knob</h1>
+      <div>
+        <Knob
+          startAngle={225}
+          onDeltaChange={console.log}
+        >
+          <button type="button" className="knob" />
+        </Knob>
+      </div>
+      <div>
+        <Knob
+          startAngle={225}
+          stepAngle={30}
+          onValueChange={console.log}
+        >
+          <button type="button" className="knob" />
+        </Knob>
+      </div>
     </div>
   )
 }

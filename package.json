@@ -1,5 +1,5 @@
 {
-  "name": "react-knob",
+  "name": "@fronterior/rotary-knob",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,10 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "prettier": "^3.4.2",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "prettier": "^3.4.2"
   },
+  "license": "MIT",
   "devDependencies": {
     "@eslint/js": "^9.17.0",
     "@types/react": "^18.3.18",
@@ -26,5 +25,9 @@
     "typescript": "~5.6.2",
     "typescript-eslint": "^8.18.2",
     "vite": "^6.0.5"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.8",
+    "react-dom": ">=18.0.8"
   }
 }

@@ -1,8 +1,29 @@
 {
-  "name": "@fronterior/rotary-knob",
-  "private": true,
   "version": "0.0.0",
+  "name": "rotary-knob",
+  "description": "A React component with only a rotating knob head",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fronterior/rotary-knob"
+  },
+  "keywords": [
+    "knob",
+    "input",
+    "ui",
+    "react",
+    "component"
+  ],
+  "homepage": "https://github.com/fronterior/rotary-knob#readme",
+  "bugs": {
+    "url": "https://github.com/fronterior/rotary-knob/issues",
+    "email": "lowfronterior@gmail.com"
+  },
+  "author": {
+    "name": "fronterior",
+    "email": "lowfronterior@gmail.com"
+  },
   "type": "module",
+  "types": "./dist/react/index.d.ts",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
@@ -13,12 +34,16 @@
     "./react": {
       "types": "./dist/react/index.d.ts",
       "import": "./dist/react/index.mjs",
-      "require": "./dist/react/index.js"
+      "require": "./dist/react/index.cjs"
     },
     "./js": {
       "types": "./dist/js/index.d.ts",
       "import": "./dist/js/index.mjs",
-      "require": "./dist/js/index.js"
+      "require": "./dist/js/index.cjs"
+    },
+    "./style/*.css": {
+      "import": "./dist/style/*.css",
+      "require": "./dist/style/*.css"
     }
   },
   "license": "MIT",

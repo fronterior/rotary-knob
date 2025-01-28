@@ -1,8 +1,8 @@
 export type RotationData = {
-  "delta.radians": number
-  "delta.angle": number
-  "abs.radians": number
-  "abs.angle": number
+  'delta.radians': number
+  'delta.angle': number
+  'abs.radians': number
+  'abs.angle': number
 }
 
 interface AttachKnobHandlersProps<Target extends HTMLElement> {
@@ -64,16 +64,16 @@ export function attachKnobHandlers<Target extends HTMLElement>({
 
     const deltaRadians = isInverted
       ? Math.sign(radians) *
-      (Math.PI - Math.abs(nextRadians) + Math.PI - Math.abs(radians))
+        (Math.PI - Math.abs(nextRadians) + Math.PI - Math.abs(radians))
       : nextRadians - radians
 
     radians = nextRadians
 
     onRotation({
-      "delta.radians": deltaRadians,
-      "delta.angle": (deltaRadians * 180) / Math.PI,
-      "abs.radians": nextRadians,
-      "abs.angle": (nextRadians * 180) / Math.PI,
+      'delta.radians': deltaRadians,
+      'delta.angle': (deltaRadians * 180) / Math.PI,
+      'abs.radians': nextRadians,
+      'abs.angle': (nextRadians * 180) / Math.PI,
     })
   }
 
@@ -86,13 +86,13 @@ export function attachKnobHandlers<Target extends HTMLElement>({
     onRotationEnd?.()
   }
 
-  target.addEventListener("pointerdown", handleDown)
-  document.addEventListener("pointermove", handleMove)
-  document.addEventListener("pointerup", handleEnd)
+  target.addEventListener('pointerdown', handleDown)
+  globalThis.document?.addEventListener('pointermove', handleMove)
+  globalThis.document?.addEventListener('pointerup', handleEnd)
 
   return () => {
-    target.removeEventListener("pointerdown", handleDown)
-    document.removeEventListener("pointermove", handleMove)
-    document.removeEventListener("pointerup", handleEnd)
+    target.removeEventListener('pointerdown', handleDown)
+    globalThis.document?.removeEventListener('pointermove', handleMove)
+    globalThis.document?.removeEventListener('pointerup', handleEnd)
   }
 }

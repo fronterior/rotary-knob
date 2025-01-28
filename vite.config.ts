@@ -10,9 +10,8 @@ export default defineConfig({
     react(),
     dts({
       include: ['src/react', 'src/js'],
-      rollupTypes: true,
       insertTypesEntry: true,
-      tsconfigPath: 'tsconfig.app.json'
+      tsconfigPath: 'tsconfig.app.json',
     }),
     {
       name: 'copy-css',
@@ -20,10 +19,10 @@ export default defineConfig({
         await fs.cp(
           path.resolve(__dirname, 'src/style'),
           path.resolve(__dirname, 'dist/style'),
-          { recursive: true }
+          { recursive: true },
         )
-      }
-    }
+      },
+    },
   ],
   build: {
     outDir: 'dist',
@@ -33,7 +32,8 @@ export default defineConfig({
         'js/index': path.resolve(__dirname, 'src/js/index.ts'),
       },
       formats: ['es', 'cjs'],
-      fileName: (format, entryName) => `${entryName}.${format === 'es' ? 'mjs' : 'cjs'}`,
+      fileName: (format, entryName) =>
+        `${entryName}.${format === 'es' ? 'mjs' : 'cjs'}`,
     },
     rollupOptions: {
       external: ['react', 'react-dom', 'react/jsx-runtime'],
@@ -42,7 +42,6 @@ export default defineConfig({
         preserveModules: true,
         preserveModulesRoot: 'src',
       },
-
-    }
-  }
+    },
+  },
 })

@@ -1,5 +1,5 @@
 {
-  "version": "0.0.0",
+  "version": "0.0.1",
   "name": "rotary-knob",
   "description": "A React component with only a rotating knob head",
   "repository": {

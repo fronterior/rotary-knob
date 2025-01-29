@@ -6,7 +6,6 @@ import { useState } from 'react'
 function App() {
   const [value, setValue] = useState(0)
 
-  globalThis.a = setValue
   return (
     <div>
       <h1>Rotary Knob</h1>

@@ -6,9 +6,12 @@ import { useState } from 'react'
 function App() {
   const [value, setValue] = useState(0)
 
+  globalThis.a = setValue
   return (
     <div>
-      <h1>Knob</h1>
+      <h1>Rotary Knob</h1>
+      <h2>Component</h2>
+      <h3>Knob</h3>
       <div>
         <Knob
           defaultValue={1}
@@ -35,7 +38,7 @@ function App() {
           <button type="button" className="knob" />
         </Knob>
       </div>
-      <h1>Infinite Knob</h1>
+      <h3>Infinite Knob</h3>
       <div>
         <Knob startAngle={225} onDeltaChange={console.log}>
           <button type="button" className="knob" />
@@ -69,6 +72,8 @@ function App() {
           <button type="button" className="knob" />
         </Knob>
       </div>
+      <h2>Hooks</h2>
+      <h3>useKnob</h3>
     </div>
   )
 }

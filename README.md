@@ -33,7 +33,7 @@ import 'rotray-knob/style/sample.css'
   minValue={0}
   maxValue={5}
   startAngle={210}
-  stepAngle={60}
+  stepValue={60}
   onStatusChange={console.log}
 >
   <button type="button" className="knob" />
@@ -62,7 +62,8 @@ import 'rotray-knob/style/sample.css'
 
 ```jsx
 const [value, setValue] = useState(0)
-;<input
+
+<input
   type="number"
   min="0"
   max="1"

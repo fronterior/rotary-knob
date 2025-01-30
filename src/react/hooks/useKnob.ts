@@ -12,7 +12,7 @@ export interface UseKnobProps {
   minValue?: number
   maxValue?: number
   startAngle?: number
-  stepAngle?: number
+  stepValue?: number
   value?: number
   onDeltaChange?: (rotationData: RotationData) => void
   onValueChange?: (value: number, rotationData: RotationData) => void
@@ -26,7 +26,7 @@ export function useKnob({
   minValue = 0,
   maxValue = 1,
   startAngle = 0,
-  stepAngle,
+  stepValue,
   value,
   onDeltaChange,
   onValueChange,
@@ -44,11 +44,18 @@ export function useKnob({
       startAngle && Number.isFinite(startAngle)
         ? (startAngle / 180) * Math.PI
         : 0
+
+    const rangeRadians =
+      Number.isFinite(maxRadians) && Number.isFinite(minRadians)
+        ? maxRadians - minRadians
+        : Math.PI * 2
     const stepRadians =
-      stepAngle && Number.isFinite(stepAngle) ? (stepAngle / 180) * Math.PI : 0
+      stepValue && Number.isFinite(stepValue)
+        ? (stepValue / (maxValue - minValue)) * rangeRadians
+        : 0
 
     return { minRadians, maxRadians, startRadians, stepRadians }
-  }, [minAngle, maxAngle, startAngle, stepAngle])
+  }, [minAngle, maxAngle, startAngle, stepValue, minValue, maxValue])
 
   // defaultValue to radians
   const defaultRadians = useMemo(() => {
@@ -83,12 +90,30 @@ export function useKnob({
     })
 
   const steppedRadians = useSteppedRadians(radians, stepRadians)
+  const steppedValue = useMemo(() => {
+    if (stepValue === undefined || value === undefined) {
+      return null
+    }
+
+    const sign = Math.sign(rotationData['delta.radians'])
+
+    return value + sign * stepValue
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stepValue, steppedRadians])
 
   const clampedRadians = useClampedRadians(
     steppedRadians,
     minRadians,
     maxRadians,
   )
+  const clampedValue = useMemo(() => {
+    if (!steppedValue) {
+      return null
+    }
+
+    return Math.min(maxValue, Math.max(minValue, steppedValue))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [steppedValue, minValue, maxValue, stepValue])
 
   usePointerUp(() => {
     setInternalRadians(clampedRadians)
@@ -108,11 +133,15 @@ export function useKnob({
   )
 
   const computedValue = useMemo(() => {
+    if (clampedValue !== null) {
+      return clampedValue
+    }
+
     const computedValue =
       (clampedRadians / (maxRadians - minRadians)) * (maxValue - minValue)
 
     return computedValue + minValue
-  }, [clampedRadians, minRadians, maxRadians, minValue, maxValue])
+  }, [clampedRadians, minRadians, maxRadians, minValue, maxValue, clampedValue])
 
   // effect
   const previousRotationData = useRef<RotationData>({
@@ -135,18 +164,21 @@ export function useKnob({
 
     onValueChange?.(computedValue, rotationData)
     // WARN: Intentionally exclude specific dependencies to ensure it is called only during rotation(uncontrolled)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clampedRadians, computedValue])
 
   // It is called when the drag rotation action(PointerMove) is performed.
   useLayoutEffect(() => {
     onDeltaChange?.(rotationData)
     // WARN: Intentionally exclude specific dependencies to ensure it is called only during rotation(uncontrolled)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rotationData])
 
   // It is called when the knob is pressed, rotated, or released.
   useLayoutEffect(() => {
     onStatusChange?.(status)
     // WARN: Intentionally exclude specific dependencies to ensure it is called only during rotation(uncontrolled)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status])
 
   // for controlled value synchronization
@@ -169,7 +201,6 @@ export function useKnob({
     }
 
     setIntegratedRadians(radiansByValueProp)
-    setInternalRadians(radiansByValueProp)
   }, [value, minAngle, maxAngle, minValue, maxValue, setInternalRadians])
 
   return {

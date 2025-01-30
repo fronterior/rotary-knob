@@ -24,7 +24,7 @@ export function useRotationHandlers<Target extends HTMLElement>({
   // However, when it needs to synchronize with an externally provided value, there is no need to notify the value change since the external source already knows the value.
   // This behavior is similar to the controlled pattern of an input in React.
   // Therefore, to handle external value synchronization, useRef is used to prevent unnecessary updates.
-  const internalRadianRef = useRef(defaultRadians)
+  const internalRadiansRef = useRef(defaultRadians)
   const [radians, setRadians] = useState(defaultRadians)
   const [rotationData, setRotationData] = useState<RotationData>({
     ['delta.radians']: 0,
@@ -53,8 +53,8 @@ export function useRotationHandlers<Target extends HTMLElement>({
         setStatus(RotationStatus.Begin)
       },
       onRotation: (data) => {
-        internalRadianRef.current += data['delta.radians']
-        setRadians(internalRadianRef.current)
+        internalRadiansRef.current += data['delta.radians']
+        setRadians(internalRadiansRef.current)
         setRotationData(data)
         setStatus(RotationStatus.Rotating)
       },
@@ -75,7 +75,7 @@ export function useRotationHandlers<Target extends HTMLElement>({
     radians,
     rotationData,
     setInternalRadians(value: number) {
-      internalRadianRef.current = value
+      internalRadiansRef.current = value
     },
     status,
   }

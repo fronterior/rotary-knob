@@ -53,14 +53,8 @@ export function useRotationHandlers<Target extends HTMLElement>({
         setStatus(RotationStatus.Begin)
       },
       onRotation: (data) => {
-        setRadians(() => {
-          const delta = data['delta.radians']
-          const nextValue = internalRadianRef.current + delta
-
-          internalRadianRef.current = nextValue
-
-          return nextValue
-        })
+        internalRadianRef.current += data['delta.radians']
+        setRadians(internalRadianRef.current)
         setRotationData(data)
         setStatus(RotationStatus.Rotating)
       },

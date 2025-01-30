@@ -13,7 +13,7 @@ function App() {
       <h3>Knob</h3>
       <div>
         <Knob
-          defaultValue={1}
+          defaultValue={0}
           minAngle={0}
           maxAngle={300}
           minValue={0}
@@ -66,6 +66,7 @@ function App() {
           maxAngle={270}
           minValue={0}
           maxValue={1}
+          stepAngle={27}
           startAngle={225}
         >
           <button type="button" className="knob" />

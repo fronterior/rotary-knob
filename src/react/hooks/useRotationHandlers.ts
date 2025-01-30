@@ -1,4 +1,10 @@
-import { type RefObject, useLayoutEffect, useRef, useState } from 'react'
+import {
+  type RefObject,
+  useCallback,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react'
 import { type RotationData, attachKnobHandlers } from '../../js/core'
 import { cursor } from '../../js/cursor-layer'
 
@@ -45,6 +51,10 @@ export function useRotationHandlers<Target extends HTMLElement>({
     return () => { }
   }, [isRotating])
 
+  const setInternalRadians = useCallback((value: number) => {
+    internalRadiansRef.current = value
+  }, [])
+
   useLayoutEffect(() => {
     return attachKnobHandlers({
       target: ref.current!,
@@ -74,9 +84,7 @@ export function useRotationHandlers<Target extends HTMLElement>({
   return {
     radians,
     rotationData,
-    setInternalRadians(value: number) {
-      internalRadiansRef.current = value
-    },
+    setInternalRadians,
     status,
   }
 }

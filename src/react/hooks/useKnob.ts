@@ -12,6 +12,7 @@ export interface UseKnobProps {
   minValue?: number
   maxValue?: number
   startAngle?: number
+  stepAngle?: number
   stepValue?: number
   value?: number
   onDeltaChange?: (rotationData: RotationData) => void
@@ -21,17 +22,21 @@ export interface UseKnobProps {
 
 export function useKnob({
   defaultValue = 0.5,
-  minAngle,
-  maxAngle,
+  minAngle = -Infinity,
+  maxAngle = Infinity,
   minValue = 0,
   maxValue = 1,
   startAngle = 0,
+  stepAngle,
   stepValue,
   value,
   onDeltaChange,
   onValueChange,
   onStatusChange,
 }: UseKnobProps) {
+  const isInfiniteKnob =
+    !Number.isFinite(minAngle) && !Number.isFinite(maxAngle)
+
   // props to radians
   const { minRadians, maxRadians, startRadians, stepRadians } = useMemo(() => {
     const minRadians = Number.isFinite(minAngle)
@@ -49,17 +54,27 @@ export function useKnob({
       Number.isFinite(maxRadians) && Number.isFinite(minRadians)
         ? maxRadians - minRadians
         : Math.PI * 2
-    const stepRadians =
-      stepValue && Number.isFinite(stepValue)
-        ? (stepValue / (maxValue - minValue)) * rangeRadians
-        : 0
+    const isValidStepValue = stepValue && Number.isFinite(stepValue)
+    let stepRadians = isValidStepValue
+      ? (stepValue / (maxValue - minValue)) * rangeRadians
+      : 0
+    stepRadians =
+      isInfiniteKnob && stepAngle ? (stepAngle / 180) * Math.PI : stepRadians
 
     return { minRadians, maxRadians, startRadians, stepRadians }
-  }, [minAngle, maxAngle, startAngle, stepValue, minValue, maxValue])
-
+  }, [
+    minAngle,
+    maxAngle,
+    startAngle,
+    stepValue,
+    minValue,
+    maxValue,
+    stepAngle,
+    isInfiniteKnob,
+  ])
   // defaultValue to radians
   const defaultRadians = useMemo(() => {
-    if (minAngle === undefined || maxAngle === undefined) {
+    if (minAngle === undefined || maxAngle === undefined || isInfiniteKnob) {
       return 0
     }
 
@@ -70,7 +85,7 @@ export function useKnob({
         180) *
       Math.PI
     )
-  }, [minAngle, maxAngle, defaultValue, minValue, maxValue])
+  }, [minAngle, maxAngle, defaultValue, minValue, maxValue, isInfiniteKnob])
 
   // NOTE:
   // This state is used to support both uncontrolled and controlled values.
@@ -139,6 +154,9 @@ export function useKnob({
 
     const computedValue =
       (clampedRadians / (maxRadians - minRadians)) * (maxValue - minValue)
+    if (Number.isNaN(computedValue)) {
+      return 0
+    }
 
     return computedValue + minValue
   }, [clampedRadians, minRadians, maxRadians, minValue, maxValue, clampedValue])
@@ -161,7 +179,6 @@ export function useKnob({
       ['abs.radians']: clampedRadians,
     }
     previousRotationData.current = rotationData
-
     onValueChange?.(computedValue, rotationData)
     // WARN: Intentionally exclude specific dependencies to ensure it is called only during rotation(uncontrolled)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -201,7 +218,7 @@ export function useKnob({
     }
 
     setIntegratedRadians(radiansByValueProp)
-  }, [value, minAngle, maxAngle, minValue, maxValue, setInternalRadians])
+  }, [value, minAngle, maxAngle, minValue, maxValue])
 
   return {
     ref: knobRef,

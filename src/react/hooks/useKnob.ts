@@ -181,6 +181,7 @@ export function useKnob({
       ['abs.angle']: computedAngle,
       ['abs.radians']: clampedRadians,
     }
+
     previousRotationData.current = rotationData
     onValueChange?.(computedValue, rotationData)
     // WARN: Intentionally exclude specific dependencies to ensure it is called only during rotation(uncontrolled)
@@ -220,9 +221,26 @@ export function useKnob({
       return
     }
 
+    // NOTE:
+    // stepValue is designed to ignore knob rotation corresponding to the value's angle.
+    // However, if internalRadians is updated when the value changes,
+    // the ignored interval in the useSteppedRadians hook gets reset,
+    // causing the knob to rotate at an angle equal to half of stepValue.
+    // Therefore, when stepValue is present, internalRadians is not updated here,
+    // and changes are driven by the value derived from useSteppedRadians.
+    if (!stepValue) {
+      setInternalRadians(radiansByValueProp)
+    }
     setIntegratedRadians(radiansByValueProp)
-    setInternalRadians(radiansByValueProp)
-  }, [value, minAngle, maxAngle, minValue, maxValue])
+  }, [
+    value,
+    minAngle,
+    maxAngle,
+    minValue,
+    maxValue,
+    stepValue,
+    setInternalRadians,
+  ])
 
   return {
     ref: knobRef,

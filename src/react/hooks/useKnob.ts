@@ -1,4 +1,4 @@
-import { useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { RotationStatus, useRotationHandlers } from './useRotationHandlers'
 import { usePointerUp } from './usePointerUp'
 import { useSteppedRadians } from './useSteppedRadians'
@@ -72,6 +72,7 @@ export function useKnob({
     stepAngle,
     isInfiniteKnob,
   ])
+
   // defaultValue to radians
   const defaultRadians = useMemo(() => {
     if (minAngle === undefined || maxAngle === undefined || isInfiniteKnob) {
@@ -130,8 +131,10 @@ export function useKnob({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [steppedValue, minValue, maxValue, stepValue])
 
-  usePointerUp(() => {
-    setInternalRadians(clampedRadians)
+  usePointerUp((ev) => {
+    if (ev.target === knobRef.current) {
+      setInternalRadians(clampedRadians)
+    }
   })
 
   useLayoutEffect(() => {
@@ -218,6 +221,7 @@ export function useKnob({
     }
 
     setIntegratedRadians(radiansByValueProp)
+    setInternalRadians(radiansByValueProp)
   }, [value, minAngle, maxAngle, minValue, maxValue])
 
   return {

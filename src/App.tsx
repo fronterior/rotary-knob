@@ -1,11 +1,17 @@
 import { Knob } from './react'
 import './App.css'
 import './style/sample.css'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 function App() {
   const [value, setValue] = useState(0)
   const [value2, setValue2] = useState(0)
+
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    inputRef.current!.value = value2.toString()
+  }, [value2])
 
   return (
     <div>
@@ -75,22 +81,22 @@ function App() {
       </div>
       <div>
         <input
+          ref={inputRef}
           type="number"
           min={0}
           max={5}
           step={1}
-          value={value2}
-          onChange={(e) => setValue2(Number(e.target.value))}
+          defaultValue={value2}
+          onBlur={(e) => setValue2(Number(e.target.value))}
         />
         <Knob
-          defaultValue={0}
+          defaultValue={value2}
           value={value2}
           onValueChange={setValue2}
           minAngle={0}
           maxAngle={300}
           minValue={0}
           maxValue={5}
-          stepValue={1}
           startAngle={210}
         >
           <button type="button" className="knob" />

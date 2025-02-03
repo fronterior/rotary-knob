@@ -20,6 +20,9 @@ export interface UseKnobProps {
   onStatusChange?: (status: RotationStatus) => void
 }
 
+// TODO:
+// When using the controlled mode, the behavior differs when exceeding the limit angle depending on whether stepValue is present.
+// It needs to be modified to work the same way as when stepValue is not set.
 export function useKnob({
   defaultValue = 0.5,
   minAngle = -Infinity,
@@ -101,8 +104,11 @@ export function useKnob({
 
   const { rotationData, radians, setInternalRadians, status } =
     useRotationHandlers({
-      defaultRadians,
       ref: knobRef,
+      defaultRadians,
+      onRotationEnd() {
+        setInternalRadians(clampedRadians)
+      },
     })
 
   const steppedRadians = useSteppedRadians(radians, stepRadians)
@@ -130,12 +136,6 @@ export function useKnob({
     return Math.min(maxValue, Math.max(minValue, steppedValue))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [steppedValue, minValue, maxValue, stepValue])
-
-  usePointerUp((ev) => {
-    if (ev.target === knobRef.current) {
-      setInternalRadians(clampedRadians)
-    }
-  })
 
   useLayoutEffect(() => {
     if (isControlledValue) {

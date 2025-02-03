@@ -8,11 +8,6 @@ import {
 import { type RotationData, attachKnobHandlers } from '../../js/core'
 import { cursor } from '../../js/cursor-layer'
 
-interface UseKnobHandlersProps<Target extends HTMLElement> {
-  defaultRadians?: number
-  ref: RefObject<Target>
-}
-
 export enum RotationStatus {
   Idle,
   Begin,
@@ -20,9 +15,16 @@ export enum RotationStatus {
   End,
 }
 
+interface UseKnobHandlersProps<Target extends HTMLElement> {
+  ref: RefObject<Target>
+  defaultRadians?: number
+  onRotationEnd?(): void
+}
+
 export function useRotationHandlers<Target extends HTMLElement>({
-  defaultRadians = 0,
   ref,
+  defaultRadians = 0,
+  onRotationEnd,
 }: UseKnobHandlersProps<Target>) {
   // NOTE:
   // Within this hook, radians only changes when a rotation action occurs.
@@ -39,6 +41,9 @@ export function useRotationHandlers<Target extends HTMLElement>({
     ['abs.angle']: 0,
   })
   const [status, setStatus] = useState(RotationStatus.Idle)
+
+  const onRotationEndRef = useRef(onRotationEnd)
+  onRotationEndRef.current = onRotationEnd
 
   const [isRotating, setIsRotating] = useState(false)
   useLayoutEffect(() => {
@@ -71,6 +76,7 @@ export function useRotationHandlers<Target extends HTMLElement>({
       onRotationEnd: () => {
         setIsRotating(false)
         setStatus(RotationStatus.End)
+        onRotationEndRef.current?.()
       },
     })
   }, [ref])

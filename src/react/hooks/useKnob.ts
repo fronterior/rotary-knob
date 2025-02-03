@@ -20,9 +20,6 @@ export interface UseKnobProps {
   onStatusChange?: (status: RotationStatus) => void
 }
 
-// TODO:
-// When using the controlled mode, the behavior differs when exceeding the limit angle depending on whether stepValue is present.
-// It needs to be modified to work the same way as when stepValue is not set.
 export function useKnob({
   defaultValue = 0.5,
   minAngle = -Infinity,
@@ -85,7 +82,7 @@ export function useKnob({
     return (
       ((minAngle +
         ((maxAngle - minAngle) * (defaultValue - minValue)) /
-        (maxValue - minValue)) /
+          (maxValue - minValue)) /
         180) *
       Math.PI
     )
@@ -111,31 +108,16 @@ export function useKnob({
       },
     })
 
+  const knobStatusRef = useRef(status)
+  knobStatusRef.current = status
+
   const steppedRadians = useSteppedRadians(radians, stepRadians)
-  const steppedValue = useMemo(() => {
-    if (stepValue === undefined || value === undefined) {
-      return null
-    }
-
-    const sign = Math.sign(rotationData['delta.radians'])
-
-    return value + sign * stepValue
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stepValue, steppedRadians])
 
   const clampedRadians = useClampedRadians(
     steppedRadians,
     minRadians,
     maxRadians,
   )
-  const clampedValue = useMemo(() => {
-    if (!steppedValue) {
-      return null
-    }
-
-    return Math.min(maxValue, Math.max(minValue, steppedValue))
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [steppedValue, minValue, maxValue, stepValue])
 
   useLayoutEffect(() => {
     if (isControlledValue) {
@@ -151,18 +133,24 @@ export function useKnob({
   )
 
   const computedValue = useMemo(() => {
-    if (clampedValue !== null) {
-      return clampedValue
-    }
-
     const computedValue =
       (clampedRadians / (maxRadians - minRadians)) * (maxValue - minValue)
     if (Number.isNaN(computedValue)) {
       return 0
     }
 
-    return computedValue + minValue
-  }, [clampedRadians, minRadians, maxRadians, minValue, maxValue, clampedValue])
+    if (!stepValue) {
+      return computedValue + minValue
+    }
+
+    const previousValue = computedValue - (computedValue % stepValue)
+    const nextValue = Math.min(previousValue + stepValue, maxValue)
+
+    return Math.abs(computedValue - previousValue) <
+      Math.abs(computedValue - nextValue)
+      ? previousValue
+      : nextValue
+  }, [clampedRadians, minRadians, maxRadians, minValue, maxValue, stepValue])
 
   // effect
   const previousRotationData = useRef<RotationData>({
@@ -228,7 +216,8 @@ export function useKnob({
     // causing the knob to rotate at an angle equal to half of stepValue.
     // Therefore, when stepValue is present, internalRadians is not updated here,
     // and changes are driven by the value derived from useSteppedRadians.
-    if (!stepValue) {
+    // Or, even if stepValue is set, it will synchronize when the value change is triggered externally rather than through a rotation action.
+    if (!stepValue || knobStatusRef.current === RotationStatus.Idle) {
       setInternalRadians(radiansByValueProp)
     }
     setIntegratedRadians(radiansByValueProp)

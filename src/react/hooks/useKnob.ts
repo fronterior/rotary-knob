@@ -1,6 +1,5 @@
 import { useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { RotationStatus, useRotationHandlers } from './useRotationHandlers'
-import { usePointerUp } from './usePointerUp'
 import { useSteppedRadians } from './useSteppedRadians'
 import { useClampedRadians } from './useClampedRadians'
 import type { RotationData } from '../../js/core'

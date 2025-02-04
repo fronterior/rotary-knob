@@ -3,6 +3,7 @@ import { RotationStatus, useRotationHandlers } from './useRotationHandlers'
 import { useSteppedRadians } from './useSteppedRadians'
 import { useClampedRadians } from './useClampedRadians'
 import type { RotationData } from '../../js/core'
+import { degreesToRadians, radiansToDegrees } from '../../js/utils'
 
 export interface UseKnobProps {
   defaultValue?: number
@@ -39,14 +40,14 @@ export function useKnob({
   // props to radians
   const { minRadians, maxRadians, startRadians, stepRadians } = useMemo(() => {
     const minRadians = Number.isFinite(minDegrees)
-      ? (minDegrees! / 180) * Math.PI
+      ? degreesToRadians(minDegrees)
       : -Infinity
     const maxRadians = Number.isFinite(maxDegrees)
-      ? (maxDegrees! / 180) * Math.PI
+      ? degreesToRadians(maxDegrees)
       : Infinity
     const startRadians =
       startDegrees && Number.isFinite(startDegrees)
-        ? (startDegrees / 180) * Math.PI
+        ? degreesToRadians(startDegrees)
         : 0
 
     const rangeRadians =
@@ -59,7 +60,7 @@ export function useKnob({
       : 0
     stepRadians =
       isInfiniteKnob && stepDegrees
-        ? (stepDegrees / 180) * Math.PI
+        ? degreesToRadians(stepDegrees)
         : stepRadians
 
     return { minRadians, maxRadians, startRadians, stepRadians }
@@ -84,12 +85,10 @@ export function useKnob({
       return 0
     }
 
-    return (
-      ((minDegrees +
-        ((maxDegrees - minDegrees) * (defaultValue - minValue)) /
-        (maxValue - minValue)) /
-        180) *
-      Math.PI
+    return degreesToRadians(
+      minDegrees +
+      ((maxDegrees - minDegrees) * (defaultValue - minValue)) /
+      (maxValue - minValue),
     )
   }, [minDegrees, maxDegrees, defaultValue, minValue, maxValue, isInfiniteKnob])
 
@@ -133,7 +132,7 @@ export function useKnob({
   }, [clampedRadians, isControlledValue])
 
   const computedDegrees = useMemo(
-    () => ((integratedRadians + startRadians) / Math.PI) * 180,
+    () => radiansToDegrees(integratedRadians + startRadians),
     [integratedRadians, startRadians],
   )
 
@@ -204,12 +203,11 @@ export function useKnob({
     ) {
       return
     }
-    const radiansByValueProp =
-      ((minDegrees +
-        ((maxDegrees - minDegrees) * (value - minValue)) /
-        (maxValue - minValue)) /
-        180) *
-      Math.PI
+    const radiansByValueProp = degreesToRadians(
+      minDegrees +
+      ((maxDegrees - minDegrees) * (value - minValue)) /
+      (maxValue - minValue),
+    )
 
     if (Number.isNaN(radiansByValueProp)) {
       return

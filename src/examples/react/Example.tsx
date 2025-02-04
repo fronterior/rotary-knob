@@ -1,9 +1,9 @@
-import { Knob } from './react'
-import './App.css'
-import './style/sample.css'
+import { Knob } from '../../react/Knob'
+import './Example.css'
+import '../../style/sample.css'
 import { useEffect, useRef, useState } from 'react'
 
-function App() {
+function Example() {
   const [value, setValue] = useState(0)
   const [value2, setValue2] = useState(0)
 
@@ -108,4 +108,4 @@ function App() {
   )
 }
 
-export default App
+export default Example

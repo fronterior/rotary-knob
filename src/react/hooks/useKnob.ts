@@ -6,12 +6,12 @@ import type { RotationData } from '../../js/core'
 
 export interface UseKnobProps {
   defaultValue?: number
-  minAngle?: number
-  maxAngle?: number
+  minDegrees?: number
+  maxDegrees?: number
   minValue?: number
   maxValue?: number
-  startAngle?: number
-  stepAngle?: number
+  startDegrees?: number
+  stepDegrees?: number
   stepValue?: number
   value?: number
   onDeltaChange?: (rotationData: RotationData) => void
@@ -21,12 +21,12 @@ export interface UseKnobProps {
 
 export function useKnob({
   defaultValue = 0.5,
-  minAngle = -Infinity,
-  maxAngle = Infinity,
+  minDegrees = -Infinity,
+  maxDegrees = Infinity,
   minValue = 0,
   maxValue = 1,
-  startAngle = 0,
-  stepAngle,
+  startDegrees = 0,
+  stepDegrees,
   stepValue,
   value,
   onDeltaChange,
@@ -34,19 +34,19 @@ export function useKnob({
   onStatusChange,
 }: UseKnobProps) {
   const isInfiniteKnob =
-    !Number.isFinite(minAngle) && !Number.isFinite(maxAngle)
+    !Number.isFinite(minDegrees) && !Number.isFinite(maxDegrees)
 
   // props to radians
   const { minRadians, maxRadians, startRadians, stepRadians } = useMemo(() => {
-    const minRadians = Number.isFinite(minAngle)
-      ? (minAngle! / 180) * Math.PI
+    const minRadians = Number.isFinite(minDegrees)
+      ? (minDegrees! / 180) * Math.PI
       : -Infinity
-    const maxRadians = Number.isFinite(maxAngle)
-      ? (maxAngle! / 180) * Math.PI
+    const maxRadians = Number.isFinite(maxDegrees)
+      ? (maxDegrees! / 180) * Math.PI
       : Infinity
     const startRadians =
-      startAngle && Number.isFinite(startAngle)
-        ? (startAngle / 180) * Math.PI
+      startDegrees && Number.isFinite(startDegrees)
+        ? (startDegrees / 180) * Math.PI
         : 0
 
     const rangeRadians =
@@ -58,34 +58,40 @@ export function useKnob({
       ? (stepValue / (maxValue - minValue)) * rangeRadians
       : 0
     stepRadians =
-      isInfiniteKnob && stepAngle ? (stepAngle / 180) * Math.PI : stepRadians
+      isInfiniteKnob && stepDegrees
+        ? (stepDegrees / 180) * Math.PI
+        : stepRadians
 
     return { minRadians, maxRadians, startRadians, stepRadians }
   }, [
-    minAngle,
-    maxAngle,
-    startAngle,
+    minDegrees,
+    maxDegrees,
+    startDegrees,
     stepValue,
     minValue,
     maxValue,
-    stepAngle,
+    stepDegrees,
     isInfiniteKnob,
   ])
 
   // defaultValue to radians
   const defaultRadians = useMemo(() => {
-    if (minAngle === undefined || maxAngle === undefined || isInfiniteKnob) {
+    if (
+      minDegrees === undefined ||
+      maxDegrees === undefined ||
+      isInfiniteKnob
+    ) {
       return 0
     }
 
     return (
-      ((minAngle +
-        ((maxAngle - minAngle) * (defaultValue - minValue)) /
-          (maxValue - minValue)) /
+      ((minDegrees +
+        ((maxDegrees - minDegrees) * (defaultValue - minValue)) /
+        (maxValue - minValue)) /
         180) *
       Math.PI
     )
-  }, [minAngle, maxAngle, defaultValue, minValue, maxValue, isInfiniteKnob])
+  }, [minDegrees, maxDegrees, defaultValue, minValue, maxValue, isInfiniteKnob])
 
   // NOTE:
   // This state is used to support both uncontrolled and controlled values.
@@ -126,7 +132,7 @@ export function useKnob({
     setIntegratedRadians(clampedRadians)
   }, [clampedRadians, isControlledValue])
 
-  const computedAngle = useMemo(
+  const computedDegrees = useMemo(
     () => ((integratedRadians + startRadians) / Math.PI) * 180,
     [integratedRadians, startRadians],
   )
@@ -153,19 +159,19 @@ export function useKnob({
 
   // effect
   const previousRotationData = useRef<RotationData>({
-    ['delta.angle']: 0,
+    ['delta.degrees']: 0,
     ['delta.radians']: 0,
-    ['abs.angle']: computedAngle,
+    ['abs.degrees']: computedDegrees,
     ['abs.radians']: clampedRadians,
   })
   // It is called only when the knob angle changes.
   useLayoutEffect(() => {
     const rotationData = {
-      ['delta.angle']:
-        computedAngle - previousRotationData.current['abs.angle'],
+      ['delta.degrees']:
+        computedDegrees - previousRotationData.current['abs.degrees'],
       ['delta.radians']:
         clampedRadians - previousRotationData.current['abs.radians'],
-      ['abs.angle']: computedAngle,
+      ['abs.degrees']: computedDegrees,
       ['abs.radians']: clampedRadians,
     }
 
@@ -193,14 +199,15 @@ export function useKnob({
   useLayoutEffect(() => {
     if (
       value === undefined ||
-      minAngle == undefined ||
-      maxAngle === undefined
+      minDegrees == undefined ||
+      maxDegrees === undefined
     ) {
       return
     }
     const radiansByValueProp =
-      ((minAngle +
-        ((maxAngle - minAngle) * (value - minValue)) / (maxValue - minValue)) /
+      ((minDegrees +
+        ((maxDegrees - minDegrees) * (value - minValue)) /
+        (maxValue - minValue)) /
         180) *
       Math.PI
 
@@ -222,8 +229,8 @@ export function useKnob({
     setIntegratedRadians(radiansByValueProp)
   }, [
     value,
-    minAngle,
-    maxAngle,
+    minDegrees,
+    maxDegrees,
     minValue,
     maxValue,
     stepValue,
@@ -233,7 +240,7 @@ export function useKnob({
   return {
     ref: knobRef,
     value: computedValue,
-    angle: computedAngle,
+    degrees: computedDegrees,
     radians,
     rotationData,
     status,

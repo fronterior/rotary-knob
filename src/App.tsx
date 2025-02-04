@@ -21,11 +21,11 @@ function App() {
       <div>
         <Knob
           defaultValue={0}
-          minAngle={0}
-          maxAngle={300}
+          minDegrees={0}
+          maxDegrees={300}
           minValue={0}
           maxValue={5}
-          startAngle={210}
+          startDegrees={210}
           stepValue={1}
           onStatusChange={console.log}
         >
@@ -35,23 +35,23 @@ function App() {
       <div>
         <Knob
           defaultValue={0.3}
-          minAngle={0}
-          maxAngle={270}
+          minDegrees={0}
+          maxDegrees={270}
           minValue={0}
           maxValue={1}
-          startAngle={225}
+          startDegrees={225}
         >
           <button type="button" className="knob" />
         </Knob>
       </div>
       <h3>Infinite Knob</h3>
       <div>
-        <Knob startAngle={225} onDeltaChange={console.log}>
+        <Knob startDegrees={225} onDeltaChange={console.log}>
           <button type="button" className="knob" />
         </Knob>
       </div>
       <div>
-        <Knob startAngle={225} stepAngle={30} onValueChange={console.log}>
+        <Knob startDegrees={225} stepDegrees={30} onValueChange={console.log}>
           <button type="button" className="knob" />
         </Knob>
       </div>
@@ -69,12 +69,12 @@ function App() {
           defaultValue={value}
           value={value}
           onValueChange={setValue}
-          minAngle={0}
-          maxAngle={270}
+          minDegrees={0}
+          maxDegrees={270}
           minValue={0}
           maxValue={1}
           stepValue={0.1}
-          startAngle={225}
+          startDegrees={225}
         >
           <button type="button" className="knob" />
         </Knob>
@@ -93,11 +93,11 @@ function App() {
           defaultValue={value2}
           value={value2}
           onValueChange={setValue2}
-          minAngle={0}
-          maxAngle={300}
+          minDegrees={0}
+          maxDegrees={300}
           minValue={0}
           maxValue={5}
-          startAngle={210}
+          startDegrees={210}
         >
           <button type="button" className="knob" />
         </Knob>

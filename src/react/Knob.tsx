@@ -7,27 +7,27 @@ interface KnobProps extends UseKnobProps {
 
 export function Knob({
   defaultValue = 0.5,
-  minAngle,
-  maxAngle,
+  minDegrees,
+  maxDegrees,
   minValue = 0,
   maxValue = 1,
   children,
-  startAngle = 0,
-  stepAngle,
+  startDegrees = 0,
+  stepDegrees,
   stepValue,
   value,
   onDeltaChange,
   onValueChange,
   onStatusChange,
 }: KnobProps) {
-  const { ref, angle } = useKnob({
+  const { ref, degrees } = useKnob({
     defaultValue,
-    minAngle,
-    maxAngle,
+    minDegrees,
+    maxDegrees,
     minValue,
     maxValue,
-    startAngle,
-    stepAngle,
+    startDegrees,
+    stepDegrees,
     stepValue,
     value,
     onDeltaChange,
@@ -44,7 +44,7 @@ export function Knob({
       style={{
         display: 'inline-block',
         cursor: 'grab',
-        transform: `rotate(${angle}deg)`,
+        transform: `rotate(${degrees}deg)`,
       }}
       ref={ref}
     >

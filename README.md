@@ -13,11 +13,11 @@ import { Knob } from 'rotary-knob/react'
 import 'rotray-knob/style/sample.css'
 ;<Knob
   defaultValue={0.3}
-  minAngle={0}
-  maxAngle={270}
+  minDegrees={0}
+  maxDegrees={270}
   minValue={0}
   maxValue={1}
-  startAngle={225}
+  startDegrees={225}
 >
   <button type="button" className="knob" />
 </Knob>
@@ -28,11 +28,11 @@ import { Knob } from 'rotary-knob/react'
 import 'rotray-knob/style/sample.css'
 ;<Knob
   defaultValue={1}
-  minAngle={0}
-  maxAngle={300}
+  minDegrees={0}
+  maxDegrees={300}
   minValue={0}
   maxValue={5}
-  startAngle={210}
+  startDegrees={210}
   stepValue={60}
   onStatusChange={console.log}
 >
@@ -45,7 +45,7 @@ import 'rotray-knob/style/sample.css'
 ```jsx
 import { Knob } from 'rotary-knob/react'
 import 'rotray-knob/style/sample.css'
-;<Knob startAngle={225} onDeltaChange={console.log}>
+;<Knob startDegrees={225} onDeltaChange={console.log}>
   <button type="button" className="knob" />
 </Knob>
 ```
@@ -53,7 +53,7 @@ import 'rotray-knob/style/sample.css'
 ```jsx
 import { Knob } from 'rotary-knob/react'
 import 'rotray-knob/style/sample.css'
-;<Knob stepAngle={30} onValueChange={console.log}>
+;<Knob stepDegrees={30} onValueChange={console.log}>
   <button type="button" className="knob" />
 </Knob>
 ```
@@ -75,11 +75,11 @@ const [value, setValue] = useState(0)
   defaultValue={0.3}
   value={value}
   onValueChange={setValue}
-  minAngle={0}
-  maxAngle={270}
+  minDegrees={0}
+  maxDegrees={270}
   minValue={0}
   maxValue={1}
-  startAngle={225}
+  startDegrees={225}
 >
   <button type="button" className="knob" />
 </Knob>
@@ -100,26 +100,26 @@ interface KnobProps extends UseKnobProps {
 
 export function Knob({
   defaultValue = 0.5,
-  minAngle,
-  maxAngle,
+  minDegrees,
+  maxDegrees,
   minValue = 0,
   maxValue = 1,
   children,
-  startAngle = 0,
-  stepAngle,
+  startDegrees = 0,
+  stepDegrees,
   value,
   onDeltaChange,
   onValueChange,
   onStatusChange,
 }: KnobProps) {
-  const { ref, angle } = useKnob({
+  const { ref, degrees } = useKnob({
     defaultValue,
-    minAngle,
-    maxAngle,
+    minDegrees,
+    maxDegrees,
     minValue,
     maxValue,
-    startAngle,
-    stepAngle,
+    startDegrees,
+    stepDegrees,
     value,
     onDeltaChange,
     onValueChange,
@@ -135,7 +135,7 @@ export function Knob({
       style={{
         display: 'inline-block',
         cursor: 'grab',
-        transform: `rotate(${angle}deg)`,
+        transform: `rotate(${degrees}deg)`,
       }}
       ref={ref}
     >

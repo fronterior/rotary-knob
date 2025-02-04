@@ -36,9 +36,9 @@ export function useRotationHandlers<Target extends HTMLElement>({
   const [radians, setRadians] = useState(defaultRadians)
   const [rotationData, setRotationData] = useState<RotationData>({
     ['delta.radians']: 0,
-    ['delta.angle']: 0,
+    ['delta.degrees']: 0,
     ['abs.radians']: 0,
-    ['abs.angle']: 0,
+    ['abs.degrees']: 0,
   })
   const [status, setStatus] = useState(RotationStatus.Idle)
 

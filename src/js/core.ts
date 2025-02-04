@@ -1,8 +1,10 @@
+import { calculateRadians, radiansToDegrees } from './utils'
+
 export type RotationData = {
   'delta.radians': number
-  'delta.angle': number
+  'delta.degrees': number
   'abs.radians': number
-  'abs.angle': number
+  'abs.degrees': number
 }
 
 interface AttachKnobHandlersProps<Target extends HTMLElement> {
@@ -19,10 +21,10 @@ export function attachKnobHandlers<Target extends HTMLElement>({
   onRotationEnd,
 }: AttachKnobHandlersProps<Target>) {
   let isDragging = false
-  let targetCenterX = 0
-  let targetCenterY = 0
-  let startCursorX = 0
-  let startCursorY = 0
+  let targetX = 0
+  let targetY = 0
+  let cursorX = 0
+  let cursorY = 0
 
   let radians = 0
 
@@ -30,16 +32,13 @@ export function attachKnobHandlers<Target extends HTMLElement>({
     ev.preventDefault()
 
     const targetRect = target.getBoundingClientRect()
-    targetCenterX = targetRect.left + targetRect.width / 2
-    targetCenterY = targetRect.top + targetRect.height / 2
+    targetX = targetRect.left + targetRect.width / 2
+    targetY = targetRect.top + targetRect.height / 2
 
-    startCursorX = ev.clientX
-    startCursorY = ev.clientY
+    cursorX = ev.clientX
+    cursorY = ev.clientY
 
-    radians = Math.atan2(
-      startCursorY - targetCenterY,
-      startCursorX - targetCenterX,
-    )
+    radians = calculateRadians(targetX, targetY, cursorX, cursorY)
 
     isDragging = true
     onRotationStart?.()
@@ -52,9 +51,11 @@ export function attachKnobHandlers<Target extends HTMLElement>({
 
     const nextCursorX = ev.clientX
     const nextCursorY = ev.clientY
-    const nextRadians = Math.atan2(
-      nextCursorY - targetCenterY,
-      nextCursorX - targetCenterX,
+    const nextRadians = calculateRadians(
+      targetX,
+      targetY,
+      nextCursorX,
+      nextCursorY,
     )
 
     // the angle exceeds 180 degrees, its value is inverted. For example, 190 degrees is expressed as -170 degrees. To ensure consistent sign changes for the same direction of rotation, calculations are adjusted accordingly.
@@ -71,9 +72,9 @@ export function attachKnobHandlers<Target extends HTMLElement>({
 
     onRotation({
       'delta.radians': deltaRadians,
-      'delta.angle': (deltaRadians * 180) / Math.PI,
+      'delta.degrees': radiansToDegrees(deltaRadians),
       'abs.radians': nextRadians,
-      'abs.angle': (nextRadians * 180) / Math.PI,
+      'abs.degrees': radiansToDegrees(nextRadians),
     })
   }
 

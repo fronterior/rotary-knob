@@ -5,15 +5,12 @@ import {
   useRef,
   useState,
 } from 'react'
-import { type RotationData, attachKnobHandlers } from '../../js/core'
+import {
+  type KnobRotation,
+  KnobStatus,
+  attachKnobHandlers,
+} from '../../js/core'
 import { cursor } from '../../js/cursor-layer'
-
-export enum RotationStatus {
-  Idle,
-  Begin,
-  Rotating,
-  End,
-}
 
 interface UseKnobHandlersProps<Target extends HTMLElement> {
   ref: RefObject<Target>
@@ -34,13 +31,13 @@ export function useRotationHandlers<Target extends HTMLElement>({
   // Therefore, to handle external value synchronization, useRef is used to prevent unnecessary updates.
   const internalRadiansRef = useRef(defaultRadians)
   const [radians, setRadians] = useState(defaultRadians)
-  const [rotationData, setRotationData] = useState<RotationData>({
+  const [rotation, setRotation] = useState<KnobRotation>({
     ['delta.radians']: 0,
     ['delta.degrees']: 0,
     ['abs.radians']: 0,
     ['abs.degrees']: 0,
   })
-  const [status, setStatus] = useState(RotationStatus.Idle)
+  const [status, setStatus] = useState(KnobStatus.Idle)
 
   const onRotationEndRef = useRef(onRotationEnd)
   onRotationEndRef.current = onRotationEnd
@@ -65,31 +62,31 @@ export function useRotationHandlers<Target extends HTMLElement>({
       target: ref.current!,
       onRotationStart: () => {
         setIsRotating(true)
-        setStatus(RotationStatus.Begin)
+        setStatus(KnobStatus.Begin)
       },
       onRotation: (data) => {
         internalRadiansRef.current += data['delta.radians']
         setRadians(internalRadiansRef.current)
-        setRotationData(data)
-        setStatus(RotationStatus.Rotating)
+        setRotation(data)
+        setStatus(KnobStatus.Rotating)
       },
       onRotationEnd: () => {
         setIsRotating(false)
-        setStatus(RotationStatus.End)
+        setStatus(KnobStatus.End)
         onRotationEndRef.current?.()
       },
     })
   }, [ref])
 
   useLayoutEffect(() => {
-    if (status === RotationStatus.End) {
-      setStatus(RotationStatus.Idle)
+    if (status === KnobStatus.End) {
+      setStatus(KnobStatus.Idle)
     }
   }, [status])
 
   return {
     radians,
-    rotationData,
+    rotation,
     setInternalRadians,
     status,
   }

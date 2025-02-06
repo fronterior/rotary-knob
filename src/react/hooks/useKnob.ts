@@ -1,8 +1,9 @@
 import { useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { RotationStatus, useRotationHandlers } from './useRotationHandlers'
+import { useRotationHandlers } from './useRotationHandlers'
 import { useSteppedRadians } from './useSteppedRadians'
 import { useClampedRadians } from './useClampedRadians'
-import type { RotationData } from '../../js/core'
+import type { KnobRotation } from '../../js/core'
+import { KnobStatus } from '../../js/core'
 import { degreesToRadians, radiansToDegrees } from '../../js/utils'
 
 export interface UseKnobProps {
@@ -15,9 +16,9 @@ export interface UseKnobProps {
   stepDegrees?: number
   stepValue?: number
   value?: number
-  onDeltaChange?: (rotationData: RotationData) => void
-  onValueChange?: (value: number, rotationData: RotationData) => void
-  onStatusChange?: (status: RotationStatus) => void
+  onDeltaChange?: (rotation: KnobRotation) => void
+  onValueChange?: (value: number, rotation: KnobRotation) => void
+  onStatusChange?: (status: KnobStatus) => void
 }
 
 export function useKnob({
@@ -103,14 +104,15 @@ export function useKnob({
 
   const knobRef = useRef<HTMLDivElement>(null)
 
-  const { rotationData, radians, setInternalRadians, status } =
-    useRotationHandlers({
+  const { rotation, radians, setInternalRadians, status } = useRotationHandlers(
+    {
       ref: knobRef,
       defaultRadians,
       onRotationEnd() {
         setInternalRadians(clampedRadians)
       },
-    })
+    },
+  )
 
   const knobStatusRef = useRef(status)
   knobStatusRef.current = status
@@ -157,7 +159,7 @@ export function useKnob({
   }, [clampedRadians, minRadians, maxRadians, minValue, maxValue, stepValue])
 
   // effect
-  const previousRotationData = useRef<RotationData>({
+  const previousRotationData = useRef<KnobRotation>({
     ['delta.degrees']: 0,
     ['delta.radians']: 0,
     ['abs.degrees']: computedDegrees,
@@ -182,10 +184,10 @@ export function useKnob({
 
   // It is called when the drag rotation action(PointerMove) is performed.
   useLayoutEffect(() => {
-    onDeltaChange?.(rotationData)
+    onDeltaChange?.(rotation)
     // WARN: Intentionally exclude specific dependencies to ensure it is called only during rotation(uncontrolled)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rotationData])
+  }, [rotation])
 
   // It is called when the knob is pressed, rotated, or released.
   useLayoutEffect(() => {
@@ -221,7 +223,7 @@ export function useKnob({
     // Therefore, when stepValue is present, internalRadians is not updated here,
     // and changes are driven by the value derived from useSteppedRadians.
     // Or, even if stepValue is set, it will synchronize when the value change is triggered externally rather than through a rotation action.
-    if (!stepValue || knobStatusRef.current === RotationStatus.Idle) {
+    if (!stepValue || knobStatusRef.current === KnobStatus.Idle) {
       setInternalRadians(radiansByValueProp)
     }
     setIntegratedRadians(radiansByValueProp)
@@ -240,7 +242,7 @@ export function useKnob({
     value: computedValue,
     degrees: computedDegrees,
     radians,
-    rotationData,
+    rotation,
     status,
   }
 }

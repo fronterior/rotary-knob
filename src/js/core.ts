@@ -1,16 +1,23 @@
 import { calculateRadians, radiansToDegrees } from './utils'
 
-export type RotationData = {
+export type KnobRotation = {
   'delta.radians': number
   'delta.degrees': number
   'abs.radians': number
   'abs.degrees': number
 }
 
+export enum KnobStatus {
+  Idle,
+  Begin,
+  Rotating,
+  End,
+}
+
 interface AttachKnobHandlersProps<Target extends HTMLElement> {
   target: Target
   onRotationStart?: () => void
-  onRotation: (data: RotationData) => void
+  onRotation: (knobRotation: KnobRotation) => void
   onRotationEnd?: () => void
 }
 

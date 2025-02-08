@@ -27,6 +27,14 @@ export class Knob<Target extends HTMLElement> {
     startDegrees: 0,
   }
 
+  isInfiniteKnob: boolean
+  minRadians: number
+  maxRadians: number
+  startRadians: number
+  stepRadians: number
+  defaultRadians: number
+  isControlledValue: boolean
+
   constructor(
     public target: Target,
     options: KnobOptions,
@@ -64,9 +72,9 @@ export class Knob<Target extends HTMLElement> {
       )
     }
 
-    const isInfiniteKnob = !isFiniteMinDegrees && !isFiniteMaxDegrees
+    this.isInfiniteKnob = !isFiniteMinDegrees && !isFiniteMaxDegrees
     if (
-      isInfiniteKnob ||
+      this.isInfiniteKnob ||
       'minValue' in options ||
       'maxValue' in options ||
       'value' in options ||
@@ -78,37 +86,37 @@ export class Knob<Target extends HTMLElement> {
       )
     }
 
-    const minRadians = Number.isFinite(minDegrees)
+    this.minRadians = Number.isFinite(minDegrees)
       ? degreesToRadians(minDegrees)
       : -Infinity
-    const maxRadians = Number.isFinite(maxDegrees)
+    this.maxRadians = Number.isFinite(maxDegrees)
       ? degreesToRadians(maxDegrees)
       : Infinity
-    const startRadians =
+    this.startRadians =
       startDegrees && Number.isFinite(startDegrees)
         ? degreesToRadians(startDegrees)
         : 0
 
     const rangeRadians =
-      Number.isFinite(maxRadians) && Number.isFinite(minRadians)
-        ? maxRadians - minRadians
+      Number.isFinite(this.maxRadians) && Number.isFinite(this.minRadians)
+        ? this.maxRadians - this.minRadians
         : Math.PI * 2
     const isValidStepValue = stepValue && Number.isFinite(stepValue)
-    let stepRadians = isValidStepValue
+    this.stepRadians = isValidStepValue
       ? (stepValue / (maxValue! - minValue!)) * rangeRadians
       : 0
-    stepRadians =
-      isInfiniteKnob && stepDegrees
+    this.stepRadians =
+      this.isInfiniteKnob && stepDegrees
         ? degreesToRadians(stepDegrees)
-        : stepRadians
+        : this.stepRadians
 
-    const defaultRadians = degreesToRadians(
+    this.defaultRadians = degreesToRadians(
       minDegrees +
-      ((maxDegrees - minDegrees) * (defaultValue - minValue)) /
-      (maxValue - minValue),
+        ((maxDegrees - minDegrees) * (defaultValue - minValue)) /
+          (maxValue - minValue),
     )
 
-    const isControlledValue = value !== undefined
+    this.isControlledValue = value !== undefined
 
     this.destory = attachKnobHandlers({
       target,

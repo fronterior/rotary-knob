@@ -36,7 +36,7 @@ export class Knob<Target extends HTMLElement> {
   defaultRadians: number
   isControlledValue: boolean
 
-  knob: FiniteKnob
+  knob: FiniteKnob<Target>
 
   constructor(
     public target: Target,
@@ -116,13 +116,6 @@ export class Knob<Target extends HTMLElement> {
         ? this.maxRadians - this.minRadians
         : Math.PI * 2
     const isValidStepValue = stepValue && Number.isFinite(stepValue)
-    this.stepRadians = isValidStepValue
-      ? (stepValue / (maxValue! - minValue!)) * rangeRadians
-      : 0
-    this.stepRadians =
-      this.isInfiniteKnob && stepDegrees
-        ? degreesToRadians(stepDegrees)
-        : this.stepRadians
 
     this.defaultRadians = degreesToRadians(
       minDegrees +
@@ -139,7 +132,7 @@ export class Knob<Target extends HTMLElement> {
       maxRadians: this.maxRadians,
       rangeRadians,
       startRadians: this.startRadians,
-      stepRadians: this.stepRadians,
+      stepValue,
       minValue,
       maxValue,
       rangeValue: maxValue - minValue,

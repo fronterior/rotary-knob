@@ -8,7 +8,6 @@ interface FiniteKnobOptions {
   maxRadians: number
   rangeRadians: number
   startRadians: number
-  stepRadians: number
   defaultValue: number
   minValue: number
   maxValue: number
@@ -22,8 +21,9 @@ interface FiniteKnobOptions {
 export class FiniteKnob<Target extends HTMLElement> {
   value: number
   radians: number
+
   constructor(
-    target: Target,
+    private target: Target,
     public options: FiniteKnobOptions,
   ) {
     const { onDeltaChange, onValueChange, onStatusChange } = this.options
@@ -37,13 +37,12 @@ export class FiniteKnob<Target extends HTMLElement> {
         cursor.show('grabbing')
       },
       onRotation: (rotation) => {
-        // const { value, radians } = this.compute(rotation)
-
-        // this.value = value
         this.radians += rotation['delta.radians']
-        const { value } = this.compute(this.radians)
+        this.value = this.computeValue(this.radians)
 
-        onValueChange(value, rotation)
+        this.render()
+
+        onValueChange(this.value, rotation)
         onDeltaChange(rotation)
         onStatusChange(KnobStatus.Rotating)
       },
@@ -61,14 +60,57 @@ export class FiniteKnob<Target extends HTMLElement> {
     })
   }
 
-  private compute(radians: number) {
+  private computeValue(radians: number) {
     const { minValue, maxValue, rangeValue, rangeRadians } = this.options
 
-    const value = minValue + (radians / rangeRadians) * rangeValue
+    let value = minValue + (radians / rangeRadians) * rangeValue
 
-    return {
-      value: clamp(value, minValue, maxValue),
+    if (this.options.stepValue) {
+      value = this.computeSteppedValue(value)
     }
+
+    return clamp(value, minValue, maxValue)
+  }
+
+  private computeSteppedValue(value: number) {
+    const stepValue = this.options.stepValue!
+
+    const previousValue = value - (value % stepValue)
+    const nextValue = Math.min(previousValue + stepValue, this.options.maxValue) // The last stepValue may not be evenly distributed depending on the range of values, so it is necessary to compare it with maxValue to accurately reflect the rotation angle.
+
+    return Math.abs(value - previousValue) < Math.abs(value - nextValue)
+      ? previousValue
+      : nextValue
+  }
+
+  private valueToRadians(value: number) {
+    return (
+      ((value - this.options.minValue) / this.options.rangeValue) *
+      this.options.rangeRadians
+    )
+  }
+
+  setValue(value: number) {
+    this.value = this.options.stepValue
+      ? clamp(
+          this.computeSteppedValue(value),
+          this.options.minValue,
+          this.options.maxValue,
+        )
+      : value
+
+    this.value = clamp(value, this.options.minValue, this.options.maxValue)
+    this.radians = this.valueToRadians(this.value)
+
+    this.render()
+  }
+
+  render() {
+    const radians = this.valueToRadians(this.value)
+    const degrees = radiansToDegrees(
+      clamp(radians, this.options.minRadians, this.options.maxRadians),
+    )
+    this.target.style.transform = `rotate(${degrees}deg)`
   }
 
   destory() {

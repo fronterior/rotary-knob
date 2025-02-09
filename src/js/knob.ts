@@ -1,6 +1,7 @@
 import { attachKnobHandlers, KnobRotation, KnobStatus } from './core'
 import { cursor } from './cursor-layer'
-import { degreesToRadians } from './utils'
+import { FiniteKnob } from './FiniteKnob'
+import { clamp, degreesToRadians } from './utils'
 
 export interface KnobOptions {
   defaultValue?: number
@@ -35,11 +36,24 @@ export class Knob<Target extends HTMLElement> {
   defaultRadians: number
   isControlledValue: boolean
 
+  knob: FiniteKnob
+
   constructor(
     public target: Target,
     options: KnobOptions,
   ) {
     Object.assign(this.options, options)
+    if (
+      this.options.defaultValue !== undefined &&
+      this.options.minValue !== undefined &&
+      this.options.maxValue !== undefined
+    ) {
+      this.options.defaultValue = clamp(
+        this.options.defaultValue,
+        this.options.minValue,
+        this.options.maxValue,
+      )
+    }
 
     const {
       defaultValue: defaultValueOptional,
@@ -118,33 +132,27 @@ export class Knob<Target extends HTMLElement> {
 
     this.isControlledValue = value !== undefined
 
-    this.destory = attachKnobHandlers({
-      target,
-      onRotationStart() {
-        onStatusChange?.(KnobStatus.Begin)
-        cursor.show('grabbing')
-      },
-      onRotation(data) {
-        // onValueChange
-        onDeltaChange?.(data)
-        onStatusChange?.(KnobStatus.Rotating)
-      },
-      onRotationEnd() {
-        onStatusChange?.(KnobStatus.End)
-        setTimeout(() => onStatusChange?.(KnobStatus.Idle))
-        cursor.hide()
-      },
+    this.knob = new FiniteKnob(target, {
+      defaultRadians: this.defaultRadians,
+      defaultValue,
+      minRadians: this.minRadians,
+      maxRadians: this.maxRadians,
+      rangeRadians,
+      startRadians: this.startRadians,
+      stepRadians: this.stepRadians,
+      minValue,
+      maxValue,
+      rangeValue: maxValue - minValue,
+      onDeltaChange: onDeltaChange ?? (() => {}),
+      onValueChange: onValueChange ?? (() => {}),
+      onStatusChange: onStatusChange ?? (() => {}),
     })
   }
 
   setOptions(options: KnobOptions) {
     const mergedOptions = { ...this.options, ...options }
-    this.destory()
+    this.knob.destory()
 
     return new Knob(this.target, mergedOptions)
-  }
-
-  destory() {
-    // inited in constructor
   }
 }

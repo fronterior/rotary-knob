@@ -62,7 +62,7 @@ export class Knob<Target extends HTMLElement> {
       maxDegrees: maxDegreesOptional,
       minValue: minValueOptional,
       maxValue: maxValueOptional,
-      startDegrees,
+      startDegrees: startDegreesOptional,
       stepDegrees,
       stepValue,
       onDeltaChange,
@@ -76,6 +76,7 @@ export class Knob<Target extends HTMLElement> {
     const maxDegrees = maxDegreesOptional!
     const minValue = minValueOptional!
     const maxValue = maxValueOptional!
+    const startDegrees = startDegreesOptional ?? 0
 
     const isFiniteMinDegrees = Number.isFinite(minDegreesOptional)
     const isFiniteMaxDegrees = Number.isFinite(maxDegreesOptional)
@@ -131,7 +132,7 @@ export class Knob<Target extends HTMLElement> {
       minRadians: this.minRadians,
       maxRadians: this.maxRadians,
       rangeRadians,
-      startRadians: this.startRadians,
+      startDegrees,
       stepValue,
       minValue,
       maxValue,

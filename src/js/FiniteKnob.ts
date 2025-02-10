@@ -7,7 +7,7 @@ interface FiniteKnobOptions {
   minRadians: number
   maxRadians: number
   rangeRadians: number
-  startRadians: number
+  startDegrees: number
   defaultValue: number
   minValue: number
   maxValue: number
@@ -29,6 +29,8 @@ export class FiniteKnob<Target extends HTMLElement> {
     const { onDeltaChange, onValueChange, onStatusChange } = this.options
     this.value = options.defaultValue
     this.radians = options.defaultRadians
+
+    this.render()
 
     this.destory = attachKnobHandlers({
       target,
@@ -106,11 +108,13 @@ export class FiniteKnob<Target extends HTMLElement> {
   }
 
   render() {
-    const radians = this.valueToRadians(this.value)
+    const radians = this.options.stepValue
+      ? this.valueToRadians(this.value)
+      : this.radians
     const degrees = radiansToDegrees(
       clamp(radians, this.options.minRadians, this.options.maxRadians),
     )
-    this.target.style.transform = `rotate(${degrees}deg)`
+    this.target.style.transform = `rotate(${this.options.startDegrees + degrees}deg)`
   }
 
   destory() {

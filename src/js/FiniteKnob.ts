@@ -41,10 +41,8 @@ export class FiniteKnob<Target extends HTMLElement> {
       },
       onRotation: (rotation) => {
         this.radians += rotation['delta.radians']
-        const { clampedValue, clampedRadians } = this.computeValue(this.radians)
-        console.log(rotation)
+        const { clampedValue, clampedRadians } = this.compute(this.radians)
         this.value = clampedValue
-
         this.render(clampedRadians)
 
         onValueChange(this.value, {
@@ -69,13 +67,13 @@ export class FiniteKnob<Target extends HTMLElement> {
     })
   }
 
-  private computeValue(radians: number) {
+  private compute(radians: number) {
     const { minValue, maxValue, rangeValue, rangeRadians } = this.options
 
     let value = minValue + (radians / rangeRadians) * rangeValue
 
     if (this.options.stepValue) {
-      value = this.computeSteppedValue(value)
+      value = this.computeStep(value)
     }
 
     const clampedValue = clamp(value, minValue, maxValue)
@@ -87,7 +85,7 @@ export class FiniteKnob<Target extends HTMLElement> {
     }
   }
 
-  private computeSteppedValue(value: number) {
+  private computeStep(value: number) {
     const stepValue = this.options.stepValue!
 
     const previousValue = value - (value % stepValue)
@@ -108,7 +106,7 @@ export class FiniteKnob<Target extends HTMLElement> {
   setValue(value: number) {
     this.value = this.options.stepValue
       ? clamp(
-          this.computeSteppedValue(value),
+          this.computeStep(value),
           this.options.minValue,
           this.options.maxValue,
         )

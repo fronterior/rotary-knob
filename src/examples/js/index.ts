@@ -2,14 +2,27 @@ import { Knob } from '../../js'
 
 console.log(Knob)
 
-const div = Object.assign(document.createElement('div'), {
-  style: 'width: 100px; height: 100px; background: salmon;',
+const knobDiv1 = Object.assign(document.createElement('div'), {
+  style:
+    'cursor: pointer; width: 100px; height: 100px; background: salmon; border-radius: 100%',
   innerText: 'A',
 })
 
-document.body.append(div)
+const knobDiv2 = Object.assign(document.createElement('div'), {
+  style:
+    'cursor: pointer; width: 100px; height: 100px; background: skyblue; border-radius: 100%',
+  innerText: 'B',
+})
 
-const knob = new Knob(div, {
+const knobDiv3 = Object.assign(document.createElement('div'), {
+  style:
+    'cursor: pointer; width: 100px; height: 100px; background: yellow; border-radius: 100%',
+  innerText: 'C',
+})
+
+document.body.append(knobDiv1, knobDiv2, knobDiv3)
+
+const knob1 = new Knob(knobDiv1, {
   defaultValue: 1,
   minValue: 1,
   maxValue: 14,
@@ -20,4 +33,13 @@ const knob = new Knob(div, {
   onValueChange: console.log,
 })
 
-console.log(knob)
+const knob2 = new Knob(knobDiv2, {
+  startDegrees: 180,
+})
+
+const knob3 = new Knob(knobDiv3, {
+  stepDegrees: 60,
+  startDegrees: 180,
+})
+
+console.log(knob2)

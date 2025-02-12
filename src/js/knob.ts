@@ -1,6 +1,7 @@
 import { attachKnobHandlers, KnobRotation, KnobStatus } from './core'
 import { cursor } from './cursor-layer'
 import { FiniteKnob } from './FiniteKnob'
+import { InfiniteKnob } from './InfiniteKnob'
 import { clamp, degreesToRadians } from './utils'
 
 export interface KnobOptions {
@@ -12,7 +13,6 @@ export interface KnobOptions {
   startDegrees?: number
   stepDegrees?: number
   stepValue?: number
-  value?: number
   onDeltaChange?(rotation: KnobRotation): void
   onValueChange?(value: number, rotation: KnobRotation): void
   onStatusChange?(status: KnobStatus): void
@@ -32,9 +32,8 @@ export class Knob<Target extends HTMLElement> {
   minRadians: number
   maxRadians: number
   startRadians: number
-  stepRadians: number
+  stepRadians?: number
   defaultRadians: number
-  isControlledValue: boolean
 
   knob: FiniteKnob<Target>
 
@@ -57,7 +56,6 @@ export class Knob<Target extends HTMLElement> {
 
     const {
       defaultValue: defaultValueOptional,
-      value,
       minDegrees: minDegreesOptional,
       maxDegrees: maxDegreesOptional,
       minValue: minValueOptional,
@@ -81,13 +79,7 @@ export class Knob<Target extends HTMLElement> {
     const isFiniteMinDegrees = Number.isFinite(minDegreesOptional)
     const isFiniteMaxDegrees = Number.isFinite(maxDegreesOptional)
 
-    if (isFiniteMinDegrees !== isFiniteMaxDegrees) {
-      throw new Error(
-        `Both minDegrees and maxDegrees must either be provided together or not provided at all. Current values: minDegrees: ${options.minDegrees}, maxDegrees: ${options.maxDegrees}`,
-      )
-    }
-
-    this.isInfiniteKnob = !isFiniteMinDegrees && !isFiniteMaxDegrees
+    this.isInfiniteKnob = !isFiniteMinDegrees || !isFiniteMaxDegrees
     if (
       this.isInfiniteKnob ||
       'minValue' in options ||
@@ -112,11 +104,14 @@ export class Knob<Target extends HTMLElement> {
         ? degreesToRadians(startDegrees)
         : 0
 
+    if (this.options.stepDegrees) {
+      this.stepRadians = degreesToRadians(this.options.stepDegrees)
+    }
+
     const rangeRadians =
       Number.isFinite(this.maxRadians) && Number.isFinite(this.minRadians)
         ? this.maxRadians - this.minRadians
         : Math.PI * 2
-    const isValidStepValue = stepValue && Number.isFinite(stepValue)
 
     this.defaultRadians = degreesToRadians(
       minDegrees +
@@ -124,23 +119,31 @@ export class Knob<Target extends HTMLElement> {
           (maxValue - minValue),
     )
 
-    this.isControlledValue = value !== undefined
-
-    this.knob = new FiniteKnob(target, {
-      defaultRadians: this.defaultRadians,
-      defaultValue,
-      minRadians: this.minRadians,
-      maxRadians: this.maxRadians,
-      rangeRadians,
-      startDegrees,
-      stepValue,
-      minValue,
-      maxValue,
-      rangeValue: maxValue - minValue,
-      onDeltaChange: onDeltaChange ?? (() => {}),
-      onValueChange: onValueChange ?? (() => {}),
-      onStatusChange: onStatusChange ?? (() => {}),
-    })
+    this.knob = this.isInfiniteKnob
+      ? new InfiniteKnob(target, {
+          defaultRadians: 0,
+          minRadians: this.minRadians,
+          maxRadians: this.maxRadians,
+          startDegrees,
+          stepRadians: this.stepRadians,
+          onDeltaChange: onDeltaChange ?? (() => {}),
+          onStatusChange: onStatusChange ?? (() => {}),
+        })
+      : new FiniteKnob(target, {
+          defaultRadians: this.defaultRadians,
+          defaultValue,
+          minRadians: this.minRadians,
+          maxRadians: this.maxRadians,
+          rangeRadians,
+          startDegrees,
+          stepValue,
+          minValue,
+          maxValue,
+          rangeValue: maxValue - minValue,
+          onDeltaChange: onDeltaChange ?? (() => {}),
+          onValueChange: onValueChange ?? (() => {}),
+          onStatusChange: onStatusChange ?? (() => {}),
+        })
   }
 
   setOptions(options: KnobOptions) {

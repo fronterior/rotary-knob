@@ -13,6 +13,7 @@ interface FiniteKnobOptions {
   maxValue: number
   rangeValue: number
   stepValue?: number
+  stepDegrees?: number
   onDeltaChange(rotation: KnobRotation): void
   onValueChange(value: number, rotation: KnobRotation): void
   onStatusChange(status: KnobStatus): void
@@ -30,7 +31,7 @@ export class FiniteKnob<Target extends HTMLElement> {
     this.value = options.defaultValue
     this.radians = options.defaultRadians
 
-    this.render()
+    this.render(this.radians)
 
     this.destory = attachKnobHandlers({
       target,
@@ -40,11 +41,17 @@ export class FiniteKnob<Target extends HTMLElement> {
       },
       onRotation: (rotation) => {
         this.radians += rotation['delta.radians']
-        this.value = this.computeValue(this.radians)
+        const { clampedValue, clampedRadians } = this.computeValue(this.radians)
+        console.log(rotation)
+        this.value = clampedValue
 
-        this.render()
+        this.render(clampedRadians)
 
-        onValueChange(this.value, rotation)
+        onValueChange(this.value, {
+          ...rotation,
+          'abs.radians': clampedRadians,
+          'abs.degrees': radiansToDegrees(clampedRadians),
+        })
         onDeltaChange(rotation)
         onStatusChange(KnobStatus.Rotating)
       },
@@ -71,7 +78,13 @@ export class FiniteKnob<Target extends HTMLElement> {
       value = this.computeSteppedValue(value)
     }
 
-    return clamp(value, minValue, maxValue)
+    const clampedValue = clamp(value, minValue, maxValue)
+    const clampedRadians = this.valueToRadians(clampedValue)
+
+    return {
+      clampedValue,
+      clampedRadians,
+    }
   }
 
   private computeSteppedValue(value: number) {
@@ -103,14 +116,9 @@ export class FiniteKnob<Target extends HTMLElement> {
 
     this.value = clamp(value, this.options.minValue, this.options.maxValue)
     this.radians = this.valueToRadians(this.value)
-
-    this.render()
   }
 
-  render() {
-    const radians = this.options.stepValue
-      ? this.valueToRadians(this.value)
-      : this.radians
+  render(radians: number) {
     const degrees = radiansToDegrees(
       clamp(radians, this.options.minRadians, this.options.maxRadians),
     )

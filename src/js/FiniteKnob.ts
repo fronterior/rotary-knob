@@ -2,6 +2,19 @@ import { attachKnobHandlers, KnobRotation, KnobStatus } from './core'
 import { cursor } from './cursor-layer'
 import { clamp, radiansToDegrees } from './utils'
 
+export type CreateFiniteKnobParatemters = {
+  defaultValue?: number
+  minDegrees?: number
+  maxDegrees?: number
+  startDegrees?: number
+  minValue?: number
+  maxValue?: number
+  stepValue?: number
+  onDeltaChange?(rotation: KnobRotation): void
+  onStatusChange?(status: KnobStatus): void
+  onValueChange?(value: number, rotation: KnobRotation): void
+}
+
 interface FiniteKnobOptions {
   defaultRadians: number
   minRadians: number

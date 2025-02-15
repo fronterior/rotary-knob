@@ -13,6 +13,7 @@ export interface KnobOptions {
   startDegrees?: number
   stepDegrees?: number
   stepValue?: number
+  isReversed?: boolean
   onDeltaChange?(rotation: KnobRotation): void
   onValueChange?(value: number, rotation: KnobRotation): void
   onStatusChange?(status: KnobStatus): void
@@ -115,34 +116,35 @@ export class Knob<Target extends HTMLElement> {
 
     this.defaultRadians = degreesToRadians(
       minDegrees +
-        ((maxDegrees - minDegrees) * (defaultValue - minValue)) /
-          (maxValue - minValue),
+      ((maxDegrees - minDegrees) * (defaultValue - minValue)) /
+      (maxValue - minValue),
     )
 
     this.knob = this.isInfiniteKnob
       ? new InfiniteKnob(target, {
-          minRadians: this.minRadians,
-          maxRadians: this.maxRadians,
-          startDegrees,
-          stepRadians: this.stepRadians,
-          onDeltaChange: onDeltaChange ?? (() => {}),
-          onStatusChange: onStatusChange ?? (() => {}),
-        })
+        minRadians: this.minRadians,
+        maxRadians: this.maxRadians,
+        startDegrees,
+        stepRadians: this.stepRadians,
+        onDeltaChange: onDeltaChange ?? (() => { }),
+        onStatusChange: onStatusChange ?? (() => { }),
+      })
       : new FiniteKnob(target, {
-          defaultRadians: this.defaultRadians,
-          defaultValue,
-          minRadians: this.minRadians,
-          maxRadians: this.maxRadians,
-          rangeRadians,
-          startDegrees,
-          stepValue,
-          minValue,
-          maxValue,
-          rangeValue: maxValue - minValue,
-          onDeltaChange: onDeltaChange ?? (() => {}),
-          onValueChange: onValueChange ?? (() => {}),
-          onStatusChange: onStatusChange ?? (() => {}),
-        })
+        defaultRadians: this.defaultRadians,
+        defaultValue,
+        minRadians: this.minRadians,
+        maxRadians: this.maxRadians,
+        rangeRadians,
+        startDegrees,
+        stepValue,
+        minValue,
+        maxValue,
+        rangeValue: maxValue - minValue,
+        isReversed: this.options.isReversed ?? false,
+        onDeltaChange: onDeltaChange ?? (() => { }),
+        onValueChange: onValueChange ?? (() => { }),
+        onStatusChange: onStatusChange ?? (() => { }),
+      })
   }
 
   setOptions(options: KnobOptions) {

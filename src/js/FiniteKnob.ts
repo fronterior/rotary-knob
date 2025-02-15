@@ -27,21 +27,29 @@ interface FiniteKnobOptions {
   rangeValue: number
   stepValue?: number
   stepDegrees?: number
+  isReversed: boolean
   onDeltaChange(rotation: KnobRotation): void
   onValueChange(value: number, rotation: KnobRotation): void
   onStatusChange(status: KnobStatus): void
 }
 
 export class FiniteKnob<Target extends HTMLElement> {
-  value: number
+  value!: number
   radians: number
 
   constructor(
     private target: Target,
     public options: FiniteKnobOptions,
   ) {
-    const { onDeltaChange, onValueChange, onStatusChange } = this.options
-    this.value = options.defaultValue
+    const {
+      minValue,
+      maxValue,
+      isReversed,
+      onDeltaChange,
+      onValueChange,
+      onStatusChange,
+    } = this.options
+    this.setValue(options.defaultValue)
     this.radians = options.defaultRadians
 
     this.render(this.radians)
@@ -58,7 +66,11 @@ export class FiniteKnob<Target extends HTMLElement> {
         this.value = clampedValue
         this.render(clampedRadians)
 
-        onValueChange(this.value, {
+        const value = isReversed
+          ? maxValue - (this.value - minValue)
+          : this.value
+
+        onValueChange(value, {
           ...rotation,
           'abs.radians': clampedRadians,
           'abs.degrees': radiansToDegrees(clampedRadians),
@@ -117,16 +129,28 @@ export class FiniteKnob<Target extends HTMLElement> {
   }
 
   setValue(value: number) {
-    this.value = this.options.stepValue
-      ? clamp(
-          this.computeStep(value),
-          this.options.minValue,
-          this.options.maxValue,
-        )
+    const { minValue, maxValue, stepValue, isReversed } = this.options
+    this.value = stepValue
+      ? clamp(this.computeStep(value), minValue, maxValue)
       : value
 
-    this.value = clamp(value, this.options.minValue, this.options.maxValue)
+    this.value = clamp(value, minValue, maxValue)
+
+    if (isReversed) {
+      this.value = maxValue - (this.value - minValue)
+    }
+
     this.radians = this.valueToRadians(this.value)
+  }
+
+  getValue() {
+    const { minValue, maxValue, isReversed } = this.options
+
+    if (isReversed) {
+      return maxValue - (this.value - minValue)
+    }
+
+    return this.value
   }
 
   render(radians: number) {

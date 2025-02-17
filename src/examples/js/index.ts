@@ -1,4 +1,5 @@
 import { Knob } from '../../js'
+import './index.css'
 
 console.log(Knob)
 

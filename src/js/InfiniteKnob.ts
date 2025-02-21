@@ -31,7 +31,7 @@ export class InfiniteKnob<Target extends HTMLElement> {
     this.radians = 0
     this.render(this.radians)
 
-    this.destory = attachKnobHandlers({
+    this.destroy = attachKnobHandlers({
       target,
       onRotationStart: () => {
         onStatusChange(KnobStatus.Begin)
@@ -86,7 +86,7 @@ export class InfiniteKnob<Target extends HTMLElement> {
     this.target.style.transform = `rotate(${this.options.startDegrees + degrees}deg)`
   }
 
-  destory() {
+  destroy() {
     // inited in constructor
   }
 }

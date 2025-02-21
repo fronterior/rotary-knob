@@ -15,7 +15,7 @@ export type CreateFiniteKnobParatemters = {
   onValueChange?(value: number, rotation: KnobRotation): void
 }
 
-interface FiniteKnobOptions {
+export interface FiniteKnobOptions {
   defaultRadians: number
   minRadians: number
   maxRadians: number
@@ -54,7 +54,7 @@ export class FiniteKnob<Target extends HTMLElement> {
 
     this.render(this.radians)
 
-    this.destory = attachKnobHandlers({
+    this.destroy = attachKnobHandlers({
       target,
       onRotationStart: () => {
         onStatusChange(KnobStatus.Begin)
@@ -160,7 +160,7 @@ export class FiniteKnob<Target extends HTMLElement> {
     this.target.style.transform = `rotate(${this.options.startDegrees + degrees}deg)`
   }
 
-  destory() {
+  destroy() {
     // inited in constructor
   }
 }

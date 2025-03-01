@@ -16,26 +16,27 @@ export type CreateFiniteKnobParatemters = {
 }
 
 export interface FiniteKnobOptions {
-  defaultRadians: number
   minRadians: number
   maxRadians: number
-  rangeRadians: number
-  startDegrees: number
+  startDegrees?: number
   defaultValue: number
   minValue: number
   maxValue: number
-  rangeValue: number
   stepValue?: number
-  stepDegrees?: number
-  isReversed: boolean
-  onDeltaChange(rotation: KnobRotation): void
-  onValueChange(value: number, rotation: KnobRotation): void
-  onStatusChange(status: KnobStatus): void
+  isReversed?: boolean
+  onDeltaChange?(rotation: KnobRotation): void
+  onValueChange?(value: number, rotation: KnobRotation): void
+  onStatusChange?(status: KnobStatus): void
 }
 
 export class FiniteKnob<Target extends HTMLElement> {
   value!: number
+
+  rangeValue: number
+
   radians: number
+
+  rangeRadians: number
 
   constructor(
     private target: Target,
@@ -44,13 +45,21 @@ export class FiniteKnob<Target extends HTMLElement> {
     const {
       minValue,
       maxValue,
-      isReversed,
-      onDeltaChange,
-      onValueChange,
-      onStatusChange,
+      isReversed = false,
+      onDeltaChange = () => {},
+      onValueChange = () => {},
+      onStatusChange = () => {},
     } = this.options
+
+    this.options.startDegrees ??= 0
+
+    this.rangeValue = maxValue - minValue
+
     this.setValue(options.defaultValue)
-    this.radians = options.defaultRadians
+
+    this.rangeRadians = this.options.maxRadians - this.options.minRadians
+
+    this.radians = this.valueToRadians(this.value)
 
     this.render(this.radians)
 
@@ -93,7 +102,8 @@ export class FiniteKnob<Target extends HTMLElement> {
   }
 
   private compute(radians: number) {
-    const { minValue, maxValue, rangeValue, rangeRadians } = this.options
+    const { rangeValue, rangeRadians } = this
+    const { minValue, maxValue } = this.options
 
     let value = minValue + (radians / rangeRadians) * rangeValue
 
@@ -123,8 +133,7 @@ export class FiniteKnob<Target extends HTMLElement> {
 
   private valueToRadians(value: number) {
     return (
-      ((value - this.options.minValue) / this.options.rangeValue) *
-      this.options.rangeRadians
+      ((value - this.options.minValue) / this.rangeValue) * this.rangeRadians
     )
   }
 

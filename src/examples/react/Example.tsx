@@ -2,6 +2,7 @@ import { Knob } from '../../react/Knob'
 import './Example.css'
 import '../../style/sample.css'
 import { useEffect, useRef, useState } from 'react'
+import { FiniteKnob } from '../../react/FiniteKnob'
 
 function Example() {
   const [value, setValue] = useState(0)
@@ -15,6 +16,15 @@ function Example() {
 
   return (
     <div>
+      <FiniteKnob
+        minRadians={0}
+        maxRadians={Math.PI * 2}
+        defaultValue={0}
+        minValue={0}
+        maxValue={10}
+      >
+        <div style={{ width: 100, height: 100 }}>Text</div>
+      </FiniteKnob>
       <h1>Rotary Knob</h1>
       <h2>Component</h2>
       <h3>Knob</h3>

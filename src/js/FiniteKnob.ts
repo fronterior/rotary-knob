@@ -38,6 +38,8 @@ export class FiniteKnob<Target extends HTMLElement> {
 
   rangeRadians: number
 
+  startDegrees: number
+
   constructor(
     private target: Target,
     public options: FiniteKnobOptions,
@@ -51,7 +53,7 @@ export class FiniteKnob<Target extends HTMLElement> {
       onStatusChange = () => {},
     } = this.options
 
-    this.options.startDegrees ??= 0
+    this.startDegrees = this.options.startDegrees ?? 0
 
     this.rangeValue = maxValue - minValue
 
@@ -166,7 +168,7 @@ export class FiniteKnob<Target extends HTMLElement> {
     const degrees = radiansToDegrees(
       clamp(radians, this.options.minRadians, this.options.maxRadians),
     )
-    this.target.style.transform = `rotate(${this.options.startDegrees + degrees}deg)`
+    this.target.style.transform = `rotate(${this.startDegrees + degrees}deg)`
   }
 
   destroy() {

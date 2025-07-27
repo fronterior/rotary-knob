@@ -2,7 +2,7 @@ import { attachKnobHandlers, KnobRotation, KnobStatus } from './core'
 import { cursor } from './cursor-layer'
 import { clamp, radiansToDegrees } from './utils'
 
-export type CreateFiniteKnobParatemters = {
+export type CreateFiniteKnobParameters = {
   defaultValue?: number
   minDegrees?: number
   maxDegrees?: number
@@ -44,14 +44,9 @@ export class FiniteKnob<Target extends HTMLElement> {
     private target: Target,
     public options: FiniteKnobOptions,
   ) {
-    const {
-      minValue,
-      maxValue,
-      isReversed = false,
-      onDeltaChange = () => {},
-      onValueChange = () => {},
-      onStatusChange = () => {},
-    } = this.options
+    this.validate(options)
+
+    const { minValue, maxValue } = this.options
 
     this.startDegrees = this.options.startDegrees ?? 0
 
@@ -65,8 +60,32 @@ export class FiniteKnob<Target extends HTMLElement> {
 
     this.render(this.radians)
 
+    this.attach()
+  }
+
+  private validate(options: FiniteKnobOptions) {
+    if (options.minValue >= options.maxValue) {
+      throw new Error('minValue must be less than maxValue')
+    }
+
+    if (options.minRadians >= options.maxRadians) {
+      throw new Error('minRadians must be less than maxRadians')
+    }
+
+    if (options.stepValue && options.stepValue <= 0) {
+      throw new Error('stepValue must be greater than 0')
+    }
+  }
+
+  private attach() {
+    const {
+      onDeltaChange = () => {},
+      onValueChange = () => {},
+      onStatusChange = () => {},
+    } = this.options
+
     this.destroy = attachKnobHandlers({
-      target,
+      target: this.target,
       onRotationStart: () => {
         onStatusChange(KnobStatus.Begin)
         cursor.show('grabbing')
@@ -77,9 +96,7 @@ export class FiniteKnob<Target extends HTMLElement> {
         this.value = clampedValue
         this.render(clampedRadians)
 
-        const value = isReversed
-          ? maxValue - (this.value - minValue)
-          : this.value
+        const value = this.normalizeValue(this.value)
 
         onValueChange(value, {
           ...rotation,
@@ -92,8 +109,8 @@ export class FiniteKnob<Target extends HTMLElement> {
       onRotationEnd: () => {
         this.radians = clamp(
           this.radians,
-          options.minRadians,
-          options.maxRadians,
+          this.options.minRadians,
+          this.options.maxRadians,
         )
 
         onStatusChange(KnobStatus.End)
@@ -139,28 +156,26 @@ export class FiniteKnob<Target extends HTMLElement> {
     )
   }
 
-  setValue(value: number) {
-    const { minValue, maxValue, stepValue, isReversed } = this.options
-    this.value = stepValue
-      ? clamp(this.computeStep(value), minValue, maxValue)
+  private normalizeValue(value: number) {
+    return this.options.isReversed
+      ? this.options.maxValue - (value - this.options.minValue)
       : value
+  }
 
-    this.value = clamp(value, minValue, maxValue)
+  setValue(value: number) {
+    const { minValue, maxValue, stepValue } = this.options
+    this.value = clamp(
+      stepValue ? this.computeStep(value) : value,
+      minValue,
+      maxValue,
+    )
 
-    if (isReversed) {
-      this.value = maxValue - (this.value - minValue)
-    }
+    this.value = this.normalizeValue(this.value)
 
     this.radians = this.valueToRadians(this.value)
   }
 
   getValue() {
-    const { minValue, maxValue, isReversed } = this.options
-
-    if (isReversed) {
-      return maxValue - (this.value - minValue)
-    }
-
     return this.value
   }
 
@@ -171,7 +186,41 @@ export class FiniteKnob<Target extends HTMLElement> {
     this.target.style.transform = `rotate(${this.startDegrees + degrees}deg)`
   }
 
+  setOptions({
+    target,
+    ...options
+  }: Partial<FiniteKnobOptions & { target: Target }>) {
+    this.destroy()
+
+    if (target) {
+      this.target = target
+    }
+
+    this.options = {
+      ...this.options,
+      ...options,
+    }
+
+    const { minValue, maxValue } = this.options
+
+    this.startDegrees = this.options.startDegrees ?? 0
+
+    this.rangeValue = maxValue - minValue
+
+    if (options.defaultValue) {
+      this.setValue(this.options.defaultValue)
+    }
+
+    this.rangeRadians = this.options.maxRadians - this.options.minRadians
+
+    this.radians = this.valueToRadians(this.value)
+
+    this.render(this.radians)
+
+    this.attach()
+  }
+
   destroy() {
-    // inited in constructor
+    // inited in constructor -> this.attach
   }
 }

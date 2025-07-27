@@ -1,6 +1,6 @@
 export * from './cursor-layer'
 export * from './core'
-export * from './Knob'
+export * from './knob'
 export * from './FiniteKnob'
 export * from './InfiniteKnob'
 export * from './utils'

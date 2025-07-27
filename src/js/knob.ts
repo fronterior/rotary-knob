@@ -1,5 +1,4 @@
-import { attachKnobHandlers, KnobRotation, KnobStatus } from './core'
-import { cursor } from './cursor-layer'
+import { KnobRotation, KnobStatus } from './core'
 import { FiniteKnob } from './FiniteKnob'
 import { InfiniteKnob } from './InfiniteKnob'
 import { clamp, degreesToRadians } from './utils'

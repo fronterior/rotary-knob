@@ -1,15 +1,6 @@
 import { attachKnobHandlers, KnobRotation, KnobStatus } from './core'
 import { cursor } from './cursor-layer'
-import { clamp, radiansToDegrees } from './utils'
-
-export type CreateInfiniteKnobParameters = {
-  minDegrees?: number
-  maxDegrees?: number
-  startDegrees?: number
-  stepDegrees?: number
-  onChange?(rotation: KnobRotation): void
-  onStatusChange?(status: KnobStatus): void
-}
+import { radiansToDegrees } from './utils'
 
 interface InfiniteKnobOptions {
   minRadians: number
@@ -47,12 +38,6 @@ export class InfiniteKnob<Target extends HTMLElement> {
         onStatusChange(KnobStatus.Rotating)
       },
       onRotationEnd: () => {
-        this.radians = clamp(
-          this.radians,
-          options.minRadians,
-          options.maxRadians,
-        )
-
         onStatusChange(KnobStatus.End)
         setTimeout(() => onStatusChange(KnobStatus.Idle))
         cursor.hide()
@@ -65,7 +50,7 @@ export class InfiniteKnob<Target extends HTMLElement> {
       radians = this.computeStep(radians)
     }
 
-    return clamp(radians, this.options.minRadians, this.options.maxRadians)
+    return radians
   }
 
   private computeStep(radians: number) {
@@ -80,9 +65,7 @@ export class InfiniteKnob<Target extends HTMLElement> {
   }
 
   render(radians: number) {
-    const degrees = radiansToDegrees(
-      clamp(radians, this.options.minRadians, this.options.maxRadians),
-    )
+    const degrees = radiansToDegrees(radians)
     this.target.style.transform = `rotate(${this.options.startDegrees + degrees}deg)`
   }
 
